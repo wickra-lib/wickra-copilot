@@ -6,11 +6,6 @@
 //! of close). `value_over` builds a fresh indicator, folds a candle slice
 //! through it serially, and returns the final value — deterministic, no shared
 //! state between calls.
-//!
-//! The resolver is exercised only by this module's tests until the volatility
-//! derivation wires it in (P-COP-1.7); the `dead_code` allow below is removed
-//! there.
-#![allow(dead_code)]
 
 use wickra_backtest_core::registry::{build, BarInput};
 use wickra_backtest_core::Candle as BtCandle;

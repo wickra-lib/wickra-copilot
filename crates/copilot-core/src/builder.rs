@@ -4,12 +4,8 @@
 //! `parallel` feature, sequentially otherwise); the per-symbol results are
 //! collected into a `BTreeMap` (never a `HashMap`) so insertion is key-ordered,
 //! then flattened and sorted by `(magnitude desc, kind asc, symbol asc, ts asc)`.
-//! Both feature builds produce a byte-identical `MarketContext`.
-//!
-//! `build_context` is reached through `Copilot::command_json` (P-COP-1.10); until
-//! that surface is wired the function is used only by its tests, hence the
-//! transient `dead_code` allow removed in P-COP-1.10.
-#![allow(dead_code)]
+//! Both feature builds produce a byte-identical `MarketContext`. It is reached
+//! through `Copilot::command_json`.
 
 use std::collections::BTreeMap;
 

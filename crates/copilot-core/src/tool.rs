@@ -5,12 +5,7 @@
 //! exist in the `MarketContext`, and returns a stably sorted `Vec<ToolCall>` an
 //! LLM can "execute" by reading the matching facts back out of the context. The
 //! keyword table is fixed here and pinned by the golden corpus. No network, no
-//! non-determinism.
-//!
-//! `query` is reached through `Copilot::command_json` (P-COP-1.10); until that
-//! surface is wired the function is used only by its tests, hence the transient
-//! `dead_code` allow removed in P-COP-1.10.
-#![allow(dead_code)]
+//! non-determinism. It is reached through `Copilot::command_json`.
 
 use std::collections::BTreeSet;
 
