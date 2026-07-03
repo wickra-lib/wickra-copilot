@@ -20,6 +20,7 @@ mod fact;
 mod feed;
 mod indicator_set;
 mod spec;
+mod tool;
 
 pub use error::{Error, Result};
 pub use fact::{Fact, FactKind, MarketContext};
