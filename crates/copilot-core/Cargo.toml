@@ -1,0 +1,49 @@
+[package]
+name = "copilot-core"
+description = "Data-driven core of the Wickra Copilot: a serde ContextSpec folded over microstructure feed snapshots into a deterministic MarketContext of hard facts (price moves, order-book imbalance, liquidation clusters, funding flips, OI changes, volatility spikes)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lints]
+workspace = true
+
+[features]
+# `parallel` derives each symbol's facts concurrently with rayon; it is on by
+# default. The wasm binding builds with --no-default-features for a sequential
+# fold that is byte-identical to the parallel one. `live` pulls the exchange
+# facade to adapt a live feed into snapshots (native-only).
+default = ["parallel"]
+parallel = ["dep:rayon"]
+live = ["dep:wickra-exchange"]
+
+[dependencies]
+# The data-driven boundary (spec / command / context as JSON/TOML).
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+# Exact decimal arithmetic where price/qty precision matters.
+rust_decimal.workspace = true
+thiserror.workspace = true
+# The Wickra core (Candle + the indicator registry that grounds volatility / OI
+# facts) and the CSV/Candle data types.
+wickra-core.workspace = true
+wickra-data.workspace = true
+# Data-parallel per-symbol fact derivation; optional (the `parallel` feature).
+rayon = { workspace = true, optional = true }
+# The native exchange facade for a live feed; optional (`live`). Snapshot field
+# names mirror wickra-exchange's order-book / trade / funding / OI / liquidation
+# streams.
+wickra-exchange = { workspace = true, optional = true }
+
+[dev-dependencies]
+proptest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
