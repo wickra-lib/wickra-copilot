@@ -32,10 +32,12 @@ toml.workspace = true
 # Exact decimal arithmetic where price/qty precision matters.
 rust_decimal.workspace = true
 thiserror.workspace = true
-# The Wickra core (Candle + the indicator registry that grounds volatility / OI
-# facts) and the CSV/Candle data types.
+# The Wickra core (Candle) and the CSV/Candle data types.
 wickra-core.workspace = true
 wickra-data.workspace = true
+# The backtester's registry factory — the only name -> indicator resolver in the
+# ecosystem — used to ground the volatility fact on a real indicator.
+wickra-backtest-core.workspace = true
 # Data-parallel per-symbol fact derivation; optional (the `parallel` feature).
 rayon = { workspace = true, optional = true }
 # The native exchange facade for a live feed; optional (`live`). Snapshot field

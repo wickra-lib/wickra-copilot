@@ -16,6 +16,7 @@
 mod error;
 mod fact;
 mod feed;
+mod indicator_set;
 mod spec;
 
 pub use error::{Error, Result};
