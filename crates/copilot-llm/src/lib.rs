@@ -28,8 +28,10 @@ use serde::Serialize;
 use copilot_core::{query, MarketContext, ToolCall};
 
 mod prompt;
+mod provider;
 
 pub use prompt::render_prompt;
+pub use provider::{OpenAiCompatible, Provider};
 
 /// An error from the LLM adapter.
 #[derive(Debug, thiserror::Error)]
