@@ -1,0 +1,32 @@
+[package]
+name = "copilot-llm"
+description = "Non-deterministic LLM adapter for the Wickra Copilot: renders a deterministic MarketContext into a prompt and calls the user's own OpenAI-compatible endpoint (Ollama / OpenAI / Claude / Gemini), key from the environment. Never part of the golden/CI core and never reachable over the C ABI."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+# The deterministic core: the MarketContext this adapter grounds its prompt on,
+# and the `query` router that fills an answer's tool calls.
+copilot-core.workspace = true
+# Prompt / request / response serialization for the chat/completions call.
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+# The HTTP client — the ONLY networking in the whole workspace. rustls (no
+# OpenSSL), blocking, JSON. This crate is deliberately excluded from the C ABI
+# and every language binding so the network and API key stay isolated.
+reqwest.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
