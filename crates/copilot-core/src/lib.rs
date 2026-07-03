@@ -13,6 +13,7 @@
 //! The public surface is assembled module by module through P-COP-1; the final
 //! re-export block lands in `lib.rs` (P-COP-1.12).
 
+mod derive;
 mod error;
 mod fact;
 mod feed;
