@@ -69,7 +69,7 @@ const KEYWORD_TABLE: &[(&str, &[FactKind])] = &[
 
 /// Route a question against the context. Returns the tool calls for every
 /// requested fact kind that exists in the context, sorted by `(kind, symbol)`.
-pub(crate) fn query(question: &str, ctx: &MarketContext) -> Vec<ToolCall> {
+pub fn query(question: &str, ctx: &MarketContext) -> Vec<ToolCall> {
     let lowered = question.to_lowercase();
     let mut kinds: BTreeSet<FactKind> = BTreeSet::new();
     for (keyword, mapped) in KEYWORD_TABLE {

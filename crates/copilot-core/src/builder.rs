@@ -20,7 +20,7 @@ use crate::indicator_set::IndicatorSet;
 use crate::spec::ContextSpec;
 
 /// Build a `MarketContext` from a feed universe and a spec.
-pub(crate) fn build_context(
+pub fn build_context(
     feeds: &BTreeMap<String, FeedSnapshot>,
     spec: &ContextSpec,
 ) -> Result<MarketContext> {
