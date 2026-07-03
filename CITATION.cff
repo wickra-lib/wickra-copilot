@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "wickra-copilot"
+abstract: >-
+  A local market copilot built on the Wickra core: a data-driven ContextSpec is
+  folded over serialized microstructure feeds (order book, trades, funding, open
+  interest, liquidations) into a deterministic MarketContext of hard facts (price
+  moves, order-book imbalance, liquidation clusters, funding flips, OI changes,
+  volatility spikes), grounding a language model in real market data. Exposed as a
+  JSON-over-C-ABI data API in ten languages, with a separate, swappable LLM
+  adapter.
+type: software
+authors:
+  - alias: kingchenc
+    website: "https://wickra.org"
+repository-code: "https://github.com/wickra-lib/wickra-copilot"
+url: "https://wickra.org"
+license:
+  - MIT
+  - Apache-2.0
+keywords:
+  - trading
+  - llm
+  - copilot
+  - microstructure
+  - finance
