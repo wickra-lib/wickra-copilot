@@ -1,0 +1,24 @@
+{
+  "name": "wickra-copilot-linux-arm64-gnu",
+  "version": "0.1.0",
+  "description": "Native binding for wickra-copilot (Linux arm64 glibc). Installed automatically as an optional dependency of wickra-copilot on matching platforms.",
+  "main": "wickra-copilot.linux-arm64-gnu.node",
+  "files": [
+    "wickra-copilot.linux-arm64-gnu.node"
+  ],
+  "license": "MIT OR Apache-2.0",
+  "engines": {
+    "node": ">= 22"
+  },
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wickra-lib/wickra-copilot"
+  },
+  "homepage": "https://github.com/wickra-lib/wickra-copilot"
+}
