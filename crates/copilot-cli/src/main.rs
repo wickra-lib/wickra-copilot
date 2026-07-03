@@ -6,5 +6,6 @@
 //! in the following units.
 
 mod args;
+mod run;
 
 fn main() {}
