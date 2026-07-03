@@ -2,9 +2,7 @@
 //!
 //! Two subcommands share the same feed inputs: `context` builds and prints the
 //! deterministic market context, and `ask` additionally sends it to a
-//! configured LLM. The runner that consumes these arguments lands in the next
-//! unit, so the fields are transiently unread here.
-#![allow(dead_code)]
+//! configured LLM.
 
 use std::path::PathBuf;
 
