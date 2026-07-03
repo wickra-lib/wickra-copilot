@@ -27,6 +27,10 @@ use serde::Serialize;
 
 use copilot_core::{query, MarketContext, ToolCall};
 
+mod prompt;
+
+pub use prompt::render_prompt;
+
 /// An error from the LLM adapter.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -81,36 +85,6 @@ pub trait LlmProvider {
     fn model(&self) -> &str;
 }
 
-/// The fixed system instruction: answer strictly from the supplied facts.
-const SYSTEM_PROMPT: &str =
-    "You are a market analyst. Answer ONLY from the facts below. If a fact is absent, say you don't know.";
-
-/// Render a deterministic prompt from a question and its grounding context.
-///
-/// This is a private helper for now; it is promoted to a public, byte-pinned
-/// `prompt::render_prompt` in the next unit.
-fn build_messages(question: &str, ctx: &MarketContext) -> Vec<Message> {
-    let facts = if ctx.facts.is_empty() {
-        "(no significant facts)".to_string()
-    } else {
-        ctx.facts
-            .iter()
-            .map(|fact| fact.human.as_str())
-            .collect::<Vec<_>>()
-            .join("\n")
-    };
-    vec![
-        Message {
-            role: "system".to_string(),
-            content: SYSTEM_PROMPT.to_string(),
-        },
-        Message {
-            role: "user".to_string(),
-            content: format!("Facts:\n{facts}\n\nQuestion: {question}"),
-        },
-    ]
-}
-
 /// Ground a question in a `MarketContext` and ask the provider.
 ///
 /// The prompt is rendered deterministically from the context, the provider is
@@ -121,7 +95,7 @@ fn build_messages(question: &str, ctx: &MarketContext) -> Vec<Message> {
 /// # Errors
 /// Returns an error if the provider fails to complete the prompt.
 pub fn ask(provider: &dyn LlmProvider, question: &str, ctx: &MarketContext) -> Result<Answer> {
-    let messages = build_messages(question, ctx);
+    let messages = render_prompt(question, ctx);
     let text = provider.complete(&messages)?;
     Ok(Answer {
         text,
@@ -202,30 +176,6 @@ mod tests {
             .tool_calls
             .iter()
             .any(|call| call.kind == Some(FactKind::PriceMove)));
-    }
-
-    #[test]
-    fn ask_prompt_carries_system_rule_and_facts() {
-        let ctx = context();
-        let messages = build_messages("why did BTC dump", &ctx);
-        assert_eq!(messages.len(), 2);
-        assert_eq!(messages[0].role, "system");
-        assert_eq!(messages[0].content, SYSTEM_PROMPT);
-        assert_eq!(messages[1].role, "user");
-        assert!(messages[1].content.contains("Question: why did BTC dump"));
-        // the fact's human prose is grounded into the prompt.
-        assert!(messages[1].content.contains(&ctx.facts[0].human));
-    }
-
-    #[test]
-    fn empty_context_still_renders_a_prompt() {
-        let ctx = MarketContext {
-            facts: Vec::new(),
-            symbols: Vec::new(),
-            lookback: 0,
-        };
-        let messages = build_messages("anything", &ctx);
-        assert!(messages[1].content.contains("(no significant facts)"));
     }
 
     #[test]
