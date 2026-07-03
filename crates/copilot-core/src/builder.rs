@@ -199,4 +199,46 @@ mod tests {
         sp.symbols.clear();
         assert!(build_context(&feeds(), &sp).is_err());
     }
+
+    #[test]
+    fn equal_magnitudes_break_by_kind_then_symbol() {
+        // Craft three facts that all round to magnitude 5.0:
+        //   BTC price move (+5%), BTC OI change (+5%), ETH price move (+5%).
+        // ETH OI is flat, so it produces no OI fact.
+        let mut m = BTreeMap::new();
+        m.insert(
+            "BTCUSDT".into(),
+            snap("BTCUSDT", &[100.0, 105.0], &[100.0, 105.0]),
+        );
+        m.insert(
+            "ETHUSDT".into(),
+            snap("ETHUSDT", &[100.0, 105.0], &[100.0, 100.0]),
+        );
+        let sp = ContextSpec {
+            symbols: vec!["BTCUSDT".into(), "ETHUSDT".into()],
+            lookback: 3,
+            facts: vec![FactKind::PriceMove, FactKind::OiChange],
+            timeframe: None,
+        };
+        let ctx = build_context(&m, &sp).unwrap();
+        // All three tie at magnitude 5.0, so ordering falls to the tie-breakers.
+        assert_eq!(ctx.facts.len(), 3);
+        for f in &ctx.facts {
+            assert!((f.magnitude - 5.0).abs() < 1e-9);
+        }
+        // kind asc (PriceMove < OiChange), then symbol asc (BTCUSDT < ETHUSDT).
+        let order: Vec<(FactKind, &str)> = ctx
+            .facts
+            .iter()
+            .map(|f| (f.kind, f.symbol.as_str()))
+            .collect();
+        assert_eq!(
+            order,
+            vec![
+                (FactKind::PriceMove, "BTCUSDT"),
+                (FactKind::PriceMove, "ETHUSDT"),
+                (FactKind::OiChange, "BTCUSDT"),
+            ]
+        );
+    }
 }
