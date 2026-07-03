@@ -14,5 +14,9 @@
 //! re-export block lands in `lib.rs` (P-COP-1.12).
 
 mod error;
+mod feed;
 
 pub use error::{Error, Result};
+pub use feed::{
+    Candle, FeedSnapshot, FundingPoint, Liquidation, OiPoint, OrderbookL2, Side, Trade,
+};
