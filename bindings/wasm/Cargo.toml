@@ -1,0 +1,33 @@
+[package]
+name = "wickra-copilot-wasm"
+description = "WebAssembly bindings for wickra-copilot — the deterministic market-context core in the browser (the LLM adapter is never exposed)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+# Modern rustc emits a wasm feature set (bulk-memory, sign-ext, …) that the
+# wasm-opt bundled with wasm-pack is too old to validate. The wasm-bindgen output
+# is already valid and functional; skip the optional size-only optimizer pass.
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
+
+[lints]
+workspace = true
+
+[dependencies]
+# The core without the `parallel` feature: no rayon, so the context folds
+# sequentially and byte-identically to the parallel build, and it compiles
+# cleanly to wasm32. Declared as a direct path dep, not `workspace = true`,
+# because cargo silently ignores `default-features = false` on an inherited
+# workspace dependency.
+copilot-core = { path = "../../crates/copilot-core", version = "0.1.0", default-features = false }
+wasm-bindgen = "0.2"
