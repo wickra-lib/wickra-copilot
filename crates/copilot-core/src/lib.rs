@@ -16,9 +16,11 @@
 mod error;
 mod fact;
 mod feed;
+mod spec;
 
 pub use error::{Error, Result};
 pub use fact::{Fact, FactKind, MarketContext};
 pub use feed::{
     Candle, FeedSnapshot, FundingPoint, Liquidation, OiPoint, OrderbookL2, Side, Trade,
 };
+pub use spec::ContextSpec;
