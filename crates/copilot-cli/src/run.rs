@@ -2,9 +2,7 @@
 //! render it — or, for `ask`, hand it to an LLM (§3.3).
 //!
 //! Only the `ask` path touches the network (through `copilot-llm`); `context`
-//! is fully deterministic and offline. The public entry point is wired into
-//! `main` in the next unit, so it is transiently unreferenced here.
-#![allow(dead_code)]
+//! is fully deterministic and offline.
 
 use std::collections::BTreeMap;
 use std::error::Error;
