@@ -14,6 +14,7 @@
 //! re-export block lands in `lib.rs` (P-COP-1.12).
 
 mod builder;
+mod config;
 mod copilot;
 mod derive;
 mod error;
@@ -23,6 +24,7 @@ mod indicator_set;
 mod spec;
 mod tool;
 
+pub use config::Config;
 pub use copilot::Copilot;
 pub use error::{Error, Result};
 pub use fact::{Fact, FactKind, MarketContext};
