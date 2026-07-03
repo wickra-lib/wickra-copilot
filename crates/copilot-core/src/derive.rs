@@ -402,4 +402,54 @@ mod tests {
         // Baseline needs 2 * lookback candles; two is not enough for lookback 3.
         assert!(derive_volatility_spike(&s, 3, &inds).is_none());
     }
+
+    #[test]
+    fn human_templates_are_byte_exact() {
+        // Both branches of every template, pinned byte-for-byte so the prose
+        // (and therefore the serialized fact) is deterministic across builds.
+        assert_eq!(
+            human_price_move("BTCUSDT", -6.0, 2),
+            "BTCUSDT dropped -6.00% over the last 2 bars."
+        );
+        assert_eq!(
+            human_price_move("BTCUSDT", 6.0, 2),
+            "BTCUSDT rose +6.00% over the last 2 bars."
+        );
+        assert_eq!(
+            human_orderbook_imbalance("BTCUSDT", 0.5),
+            "BTCUSDT order book is bid-heavy (imbalance +0.50)."
+        );
+        assert_eq!(
+            human_orderbook_imbalance("BTCUSDT", -0.5),
+            "BTCUSDT order book is ask-heavy (imbalance -0.50)."
+        );
+        assert_eq!(
+            human_liquidation_cluster("BTCUSDT", 1000.0, true),
+            "BTCUSDT saw 1000.00 notional liquidated (long-dominated)."
+        );
+        assert_eq!(
+            human_liquidation_cluster("BTCUSDT", 1000.0, false),
+            "BTCUSDT saw 1000.00 notional liquidated (short-dominated)."
+        );
+        assert_eq!(
+            human_funding_flip("BTCUSDT", -0.0001),
+            "BTCUSDT funding flipped to negative (-0.0001)."
+        );
+        assert_eq!(
+            human_funding_flip("BTCUSDT", 0.0001),
+            "BTCUSDT funding flipped to positive (+0.0001)."
+        );
+        assert_eq!(
+            human_oi_change("BTCUSDT", 5.0),
+            "BTCUSDT open interest rose +5.00% over the window."
+        );
+        assert_eq!(
+            human_oi_change("BTCUSDT", -5.0),
+            "BTCUSDT open interest fell -5.00% over the window."
+        );
+        assert_eq!(
+            human_volatility_spike("BTCUSDT", 2.0),
+            "BTCUSDT volatility spiked to 2.00x its baseline."
+        );
+    }
 }
