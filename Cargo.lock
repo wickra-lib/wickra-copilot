@@ -2274,6 +2274,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "wickra-copilot-c"
+version = "0.1.0"
+dependencies = [
+ "copilot-core",
+]
+
+[[package]]
 name = "wickra-core"
 version = "0.9.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
