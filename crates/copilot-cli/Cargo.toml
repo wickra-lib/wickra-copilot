@@ -1,0 +1,39 @@
+[package]
+name = "wickra-copilot"
+description = "Command-line reference consumer for the Wickra Copilot: builds a deterministic MarketContext from serialized microstructure feeds and, optionally, asks a user-configured LLM to explain it."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[[bin]]
+name = "wickra-copilot"
+path = "src/main.rs"
+
+[lints]
+workspace = true
+
+[features]
+# `live` pulls the exchange facade so the CLI can adapt a live feed into
+# snapshots; off by default (the CLI reads serialized feeds from disk/stdin).
+live = ["copilot-core/live", "dep:wickra-exchange"]
+
+[dependencies]
+# Argument parsing.
+clap = { workspace = true }
+# The deterministic core: spec parsing, context building and the tool router.
+copilot-core.workspace = true
+# The non-deterministic LLM adapter, used only by the `ask` subcommand.
+copilot-llm.workspace = true
+# CSV/Candle data types shared across the ecosystem.
+wickra-data.workspace = true
+# JSON rendering of the context and feed parsing.
+serde_json.workspace = true
+# The native exchange facade for a live feed; optional (`live`).
+wickra-exchange = { workspace = true, optional = true }
