@@ -7,11 +7,8 @@
 //! never a zero fact. The `human` strings are fixed English templates with
 //! rounded numbers — no LLM.
 //!
-//! These functions are called by the builder (P-COP-1.8), which is itself
-//! reached through `Copilot::command_json` (P-COP-1.10); until that surface is
-//! wired the module is used only by its tests, hence the transient `dead_code`
-//! allow removed in P-COP-1.10.
-#![allow(dead_code)]
+//! These functions are called by the builder, which is reached through
+//! `Copilot::command_json`.
 
 use crate::fact::{Fact, FactKind};
 use crate::feed::{FeedSnapshot, Side};

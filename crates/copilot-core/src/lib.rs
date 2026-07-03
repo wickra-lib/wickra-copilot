@@ -14,6 +14,7 @@
 //! re-export block lands in `lib.rs` (P-COP-1.12).
 
 mod builder;
+mod copilot;
 mod derive;
 mod error;
 mod fact;
@@ -22,9 +23,17 @@ mod indicator_set;
 mod spec;
 mod tool;
 
+pub use copilot::Copilot;
 pub use error::{Error, Result};
 pub use fact::{Fact, FactKind, MarketContext};
 pub use feed::{
     Candle, FeedSnapshot, FundingPoint, Liquidation, OiPoint, OrderbookL2, Side, Trade,
 };
 pub use spec::ContextSpec;
+pub use tool::ToolCall;
+
+/// The library version.
+#[must_use]
+pub fn version() -> &'static str {
+    Copilot::version()
+}
