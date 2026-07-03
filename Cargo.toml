@@ -1,0 +1,101 @@
+# Wickra Copilot — workspace.
+# A local market copilot built as one data-driven core (`copilot-core`): a serde
+# `ContextSpec` is folded over serialized microstructure feeds (order book,
+# trades, funding, open interest, liquidations) into a deterministic
+# `MarketContext` — a stable, byte-identical list of hard facts (price moves,
+# order-book imbalance, liquidation clusters, funding flips, OI changes,
+# volatility spikes). That grounding context is exposed as a JSON-over-C-ABI data
+# API in ten languages, mirroring the Wickra tiering: Rust core -> native
+# Python/Node/WASM + a C ABI hub for C/C++/C#/Go/Java/R.
+#
+# A SEPARATE, swappable adapter crate (`copilot-llm`) renders the context into a
+# prompt and calls the user's own LLM endpoint (Ollama / OpenAI / Claude / Gemini
+# via the OpenAI-compatible chat/completions interface, key from the environment).
+# The LLM call is non-deterministic and is never part of the golden/CI core.
+#
+# The `members` list grows as crates are added, phase by phase; the final set is:
+#   crates/copilot-core, crates/copilot-llm, crates/copilot-cli,
+#   crates/copilot-desktop, crates/copilot-bench,
+#   bindings/c, bindings/python, bindings/node, bindings/wasm
+
+[workspace]
+resolver = "2"
+members = []
+# The fuzz crate is its own (detached) workspace — cargo-fuzz builds it on a
+# nightly toolchain with sanitizer flags.
+exclude = ["fuzz"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.86"
+license = "MIT OR Apache-2.0"
+authors = ["wickra-lib"]
+repository = "https://github.com/wickra-lib/wickra-copilot"
+homepage = "https://wickra.org"
+readme = "README.md"
+keywords = ["trading", "llm", "copilot", "microstructure", "finance"]
+categories = ["finance", "command-line-utilities"]
+
+[workspace.dependencies]
+# Wickra ecosystem. wickra-core and wickra-data ship on crates.io. wickra-exchange
+# supplies the microstructure feeds (order book, trades, funding, open interest,
+# liquidations) whose serialized snapshots are the copilot's context inputs; it is
+# consumed from git until its first crates.io release (its tag is USER-GO gated),
+# with a `version` pinned alongside `git` so the dependency is not a wildcard
+# (cargo-deny's `bans.wildcards = deny`).
+wickra-core = "0.9"
+wickra-data = "0.9"
+wickra-exchange = { git = "https://github.com/wickra-lib/wickra-exchange", version = "0.1" }
+# The only name -> indicator registry in the ecosystem: the backtester's factory
+# resolves any of the 514 indicators by name + params, used to ground fact
+# derivations (volatility, OI deltas) on real indicators. Consumed from git until
+# its first crates.io release; a `version` is pinned alongside `git` so it is not
+# a wildcard (cargo-deny bans.wildcards).
+wickra-backtest-core = { git = "https://github.com/wickra-lib/wickra-backtest", version = "0.1" }
+# Workspace-internal crate, referenced by the LLM adapter, CLI, bench and bindings.
+copilot-core = { version = "0.1.0", path = "crates/copilot-core" }
+# Serialization — the data-driven boundary (spec/command/context as JSON/TOML).
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+# Exact decimal arithmetic where price/qty precision matters.
+rust_decimal = { version = "1", features = ["serde"] }
+thiserror = "2"
+# Data-parallel fact derivation across the symbol universe.
+rayon = "1"
+clap = { version = "4", features = ["derive"] }
+# HTTP client for the LLM adapter ONLY (copilot-llm); the deterministic core does
+# no networking. rustls (no OpenSSL), blocking, JSON.
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
+# C ABI header generation.
+cbindgen = "0.27"
+# Test/dev.
+criterion = "0.5"
+proptest = "1"
+
+[workspace.lints.rust]
+# The core and all bindings are safe Rust; the C ABI hub re-allows unsafe
+# locally (it must call across the FFI boundary).
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+# Allowed pedantic lints (same precedent as the wickra core).
+cast_precision_loss = "allow"
+cast_sign_loss = "allow"
+cast_possible_truncation = "allow"
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+too_many_lines = "allow"
+similar_names = "allow"
+
+[profile.release]
+# Panics must never unwind across the C ABI boundary: abort instead.
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
