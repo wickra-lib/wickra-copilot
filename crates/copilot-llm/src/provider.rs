@@ -230,4 +230,48 @@ mod tests {
         assert!(rendered.contains("gpt-4o-mini"));
         assert_eq!(provider.model(), "gpt-4o-mini");
     }
+
+    /// Exercises the full `from_provider` environment logic. This is the only
+    /// test that touches the `WICKRA_COPILOT_*` variables, and it drives every
+    /// case sequentially in one test so there is no cross-test env race (no
+    /// other test reads or writes these variables).
+    #[test]
+    fn from_provider_applies_environment_overrides() {
+        for key in [
+            "WICKRA_COPILOT_BASE_URL",
+            "WICKRA_COPILOT_MODEL",
+            "WICKRA_COPILOT_API_KEY",
+        ] {
+            env::remove_var(key);
+        }
+
+        // No overrides: a preset falls back to its defaults, and Ollama needs no
+        // key.
+        let ollama = OpenAiCompatible::from_provider(Provider::Ollama).unwrap();
+        assert_eq!(ollama.base_url, "http://localhost:11434/v1");
+        assert_eq!(ollama.model, "llama3");
+        assert!(ollama.api_key.is_empty());
+
+        // Custom without a base URL is a clean error, not a panic.
+        assert!(OpenAiCompatible::from_provider(Provider::Custom).is_err());
+
+        // The environment overrides base URL, model and key for any preset.
+        env::set_var("WICKRA_COPILOT_BASE_URL", "https://proxy.internal/v1");
+        env::set_var("WICKRA_COPILOT_MODEL", "house-model");
+        env::set_var("WICKRA_COPILOT_API_KEY", "sk-env-key");
+        let custom = OpenAiCompatible::from_provider(Provider::Custom).unwrap();
+        assert_eq!(custom.base_url, "https://proxy.internal/v1");
+        assert_eq!(custom.model, "house-model");
+        assert_eq!(custom.api_key, "sk-env-key");
+        // Even a keyed provider never leaks the key through Debug.
+        assert!(!format!("{custom:?}").contains("sk-env-key"));
+
+        for key in [
+            "WICKRA_COPILOT_BASE_URL",
+            "WICKRA_COPILOT_MODEL",
+            "WICKRA_COPILOT_API_KEY",
+        ] {
+            env::remove_var(key);
+        }
+    }
 }
