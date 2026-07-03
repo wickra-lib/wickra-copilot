@@ -20,7 +20,7 @@
 
 [workspace]
 resolver = "2"
-members = ["crates/copilot-core"]
+members = ["crates/copilot-core", "crates/copilot-llm"]
 # The fuzz crate is its own (detached) workspace — cargo-fuzz builds it on a
 # nightly toolchain with sanitizer flags.
 exclude = ["fuzz"]
@@ -55,6 +55,10 @@ wickra-exchange = { git = "https://github.com/wickra-lib/wickra-exchange", versi
 wickra-backtest-core = { git = "https://github.com/wickra-lib/wickra-backtest", version = "0.1" }
 # Workspace-internal crate, referenced by the LLM adapter, CLI, bench and bindings.
 copilot-core = { version = "0.1.0", path = "crates/copilot-core" }
+# The non-deterministic LLM adapter. Consumed by the CLI and desktop reference
+# consumers only — never by the C ABI or any language binding, so the network and
+# API key stay isolated from the FFI surface.
+copilot-llm = { version = "0.1.0", path = "crates/copilot-llm" }
 # Serialization — the data-driven boundary (spec/command/context as JSON/TOML).
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
