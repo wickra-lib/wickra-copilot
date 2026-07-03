@@ -10,8 +10,10 @@
 //! The LLM call that turns that context into an answer lives in the separate,
 //! non-deterministic `copilot-llm` adapter — never here.
 //!
-//! The public surface is assembled module by module through P-COP-1; the final
-//! re-export block lands in `lib.rs` (P-COP-1.12).
+//! Everything a consumer needs is re-exported from the crate root: the `Copilot`
+//! handle and its `command_json` protocol, the free `build_context` and `query`
+//! functions, the `ContextSpec` / `Fact` / `MarketContext` data model, the feed
+//! input types, and `Config` / `version`.
 
 mod builder;
 mod config;
@@ -24,6 +26,7 @@ mod indicator_set;
 mod spec;
 mod tool;
 
+pub use builder::build_context;
 pub use config::Config;
 pub use copilot::Copilot;
 pub use error::{Error, Result};
@@ -32,7 +35,7 @@ pub use feed::{
     Candle, FeedSnapshot, FundingPoint, Liquidation, OiPoint, OrderbookL2, Side, Trade,
 };
 pub use spec::ContextSpec;
-pub use tool::ToolCall;
+pub use tool::{query, ToolCall};
 
 /// The library version.
 #[must_use]
