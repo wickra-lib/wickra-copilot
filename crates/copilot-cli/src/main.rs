@@ -2,7 +2,9 @@
 //!
 //! It builds a deterministic `MarketContext` from serialized microstructure
 //! feeds and, with the `ask` subcommand, hands that context to a user-configured
-//! LLM for a natural-language explanation. The argument parser, the command
-//! runner and the glue land in the following units.
+//! LLM for a natural-language explanation. The command runner and the glue land
+//! in the following units.
+
+mod args;
 
 fn main() {}
