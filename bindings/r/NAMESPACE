@@ -1,0 +1,4 @@
+useDynLib(wickracopilot, .registration = TRUE, .fixes = "C_")
+export(wkcopilot_version)
+export(wkcopilot_new)
+export(wkcopilot_command)
