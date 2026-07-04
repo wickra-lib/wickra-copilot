@@ -1,0 +1,18 @@
+Package: wickracopilot
+Type: Package
+Title: Deterministic Market-Context Copilot Core
+Version: 0.1.0
+Authors@R: person("kingchenc", role = c("aut", "cre"), email = "support@wickra.org")
+Description: R bindings for wickra-copilot over its C ABI hub: build a Copilot
+    from a spec JSON, drive it with command JSON and read back a ranked list of
+    hard facts - the same protocol as the CLI and every other binding. Only the
+    deterministic core is exposed; the LLM adapter is never reachable over the C
+    ABI.
+License: MIT + file LICENSE | Apache License 2.0
+URL: https://github.com/wickra-lib/wickra-copilot
+BugReports: https://github.com/wickra-lib/wickra-copilot/issues
+Encoding: UTF-8
+NeedsCompilation: yes
+SystemRequirements: the wickra-copilot C ABI shared library (WKCOPILOT_LIB) and
+    its header (WKCOPILOT_INC).
+RoxygenNote: 7.3.2
