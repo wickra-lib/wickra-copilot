@@ -365,9 +365,9 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-rust
       - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
-      # The pom points native.lib.dir at target/debug, so build the debug profile.
+      # The pom points native.lib.dir at target/release, so build the release profile.
       - name: Build the C ABI library
-        run: cargo build -p wickra-copilot-c
+        run: cargo build -p wickra-copilot-c --release
       - uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
         with:
           distribution: temurin
