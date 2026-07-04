@@ -1,0 +1,6 @@
+{
+  "symbols": ["ETHUSDT"],
+  "lookback": 20,
+  "timeframe": "1m",
+  "facts": ["price_move", "oi_change"]
+}

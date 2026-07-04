@@ -1,0 +1,6 @@
+{
+  "symbols": ["BTCUSDT", "ETHUSDT"],
+  "lookback": 20,
+  "timeframe": "1m",
+  "facts": ["funding_flip"]
+}

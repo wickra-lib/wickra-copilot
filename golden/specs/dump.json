@@ -1,0 +1,6 @@
+{
+  "symbols": ["BTCUSDT"],
+  "lookback": 20,
+  "timeframe": "1m",
+  "facts": ["price_move", "orderbook_imbalance", "liquidation_cluster", "funding_flip", "oi_change", "volatility_spike"]
+}
