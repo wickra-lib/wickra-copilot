@@ -1,0 +1,6 @@
+{
+  "symbols": ["BTCUSDT"],
+  "lookback": 20,
+  "timeframe": "1m",
+  "facts": ["volatility_spike"]
+}
