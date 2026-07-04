@@ -2691,6 +2691,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "wickra-copilot-ask-example"
+version = "0.1.0"
+dependencies = [
+ "copilot-core",
+ "copilot-llm",
+ "serde_json",
+]
+
+[[package]]
 name = "wickra-copilot-c"
 version = "0.1.0"
 dependencies = [

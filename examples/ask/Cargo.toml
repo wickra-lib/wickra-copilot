@@ -1,0 +1,20 @@
+[package]
+name = "wickra-copilot-ask-example"
+description = "A runnable LLM-adapter example for the Wickra Copilot (network, key from env)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "ask"
+path = "src/main.rs"
+
+[dependencies]
+copilot-core = { workspace = true }
+copilot-llm = { workspace = true }
+serde_json = { workspace = true }
