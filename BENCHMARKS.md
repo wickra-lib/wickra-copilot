@@ -27,9 +27,26 @@ cargo bench -p copilot-bench
 
 ## Results
 
-_To be filled in from the criterion run in the test-rigor / docs phase._ Figures
-will be the median estimate on a single machine; treat them as orders of
-magnitude, not guarantees — they vary with CPU and toolchain.
+Measured on one developer machine (release build, `parallel` feature), median
+criterion estimates. Treat these as orders of magnitude, not guarantees — they
+vary with CPU and toolchain.
+
+A full `build_context` over a synthetic universe, every symbol requesting all six
+fact kinds:
+
+| Universe     | build_context (median) | Throughput    |
+|--------------|-----------------------:|--------------:|
+| 1 symbol     |                ~3.1 µs |  ~320 K sym/s |
+| 10 symbols   |                 ~35 µs |  ~280 K sym/s |
+| 100 symbols  |               ~0.27 ms |  ~375 K sym/s |
+| 1,000 symbols |               ~2.5 ms |  ~400 K sym/s |
+
+The build is **roughly linear in the number of symbols** — 10× the universe is
+about 8–10× the time — because each symbol's facts are derived independently.
+Per-symbol throughput is flat at a few hundred thousand symbol-contexts per
+second, so a 1,000-symbol universe with all six facts assembles in about
+**2.5 ms**. The parallel (rayon) and sequential builds produce a byte-identical
+`MarketContext`; these figures are the parallel path.
 
 ## Caveats
 
