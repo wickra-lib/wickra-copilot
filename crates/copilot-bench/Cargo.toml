@@ -1,0 +1,29 @@
+[package]
+name = "copilot-bench"
+description = "Criterion benchmarks for the Wickra Copilot core: build_context scaling by universe size, parallel vs sequential."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[features]
+# Toggle the core's parallel fold so `cargo bench` (default) measures the rayon
+# path and `cargo bench --no-default-features` measures the sequential one.
+default = ["parallel"]
+parallel = ["copilot-core/parallel"]
+
+[dependencies]
+copilot-core = { path = "../copilot-core", version = "0.1.0", default-features = false }
+
+[dev-dependencies]
+criterion.workspace = true
+
+[[bench]]
+name = "copilot"
+harness = false
