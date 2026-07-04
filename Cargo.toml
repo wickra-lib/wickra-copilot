@@ -20,7 +20,7 @@
 
 [workspace]
 resolver = "2"
-members = ["crates/copilot-core", "crates/copilot-llm", "crates/copilot-cli", "crates/copilot-bench", "bindings/c", "bindings/python", "bindings/node", "bindings/wasm"]
+members = ["crates/copilot-core", "crates/copilot-llm", "crates/copilot-cli", "crates/copilot-bench", "bindings/c", "bindings/python", "bindings/node", "bindings/wasm", "examples/rust"]
 # The fuzz crate is its own (detached) workspace — cargo-fuzz builds it on a
 # nightly toolchain with sanitizer flags.
 exclude = ["fuzz"]
