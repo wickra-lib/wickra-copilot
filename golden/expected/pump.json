@@ -1,0 +1,1 @@
+{"facts":[{"kind":"price_move","symbol":"ETHUSDT","value":9.301251090000001,"magnitude":9.301251090000001,"ts":1700002340,"human":"ETHUSDT rose +9.30% over the last 20 bars."},{"kind":"oi_change","symbol":"ETHUSDT","value":6.0,"magnitude":6.0,"ts":1700002340,"human":"ETHUSDT open interest rose +6.00% over the window."}],"symbols":["ETHUSDT"],"lookback":20}
