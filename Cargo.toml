@@ -62,7 +62,7 @@ copilot-llm = { version = "0.1.0", path = "crates/copilot-llm" }
 # Serialization — the data-driven boundary (spec/command/context as JSON/TOML).
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-toml = "0.8"
+toml = "1.1"
 # Exact decimal arithmetic where price/qty precision matters.
 rust_decimal = { version = "1", features = ["serde"] }
 thiserror = "2"
@@ -75,7 +75,7 @@ reqwest = { version = "0.12", default-features = false, features = ["blocking", 
 # C ABI header generation.
 cbindgen = "0.27"
 # Test/dev.
-criterion = "0.5"
+criterion = "0.8"
 proptest = "1"
 
 [workspace.lints.rust]
