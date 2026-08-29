@@ -22,4 +22,6 @@ exclude = [
     "^https?://pypi\\.org/project/wickra-copilot",
     "^https?://www\\.npmjs\\.com/package/wickra-copilot",
     "^https?://pkg\\.go\\.dev/github\\.com/wickra-lib/wickra-copilot-go",
+    "^https?://www\\.nuget\\.org/packages/Wickra\\.Copilot",
+    "^https?://central\\.sonatype\\.com/artifact/org\\.wickra/wickra-copilot",
 ]

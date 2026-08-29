@@ -7,11 +7,20 @@
 [![CI](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/ci.svg)](https://github.com/wickra-lib/wickra-copilot/actions/workflows/ci.yml)
 [![CodeQL](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/codeql.svg)](https://github.com/wickra-lib/wickra-copilot/actions/workflows/codeql.yml)
 [![codecov](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/codecov.svg)](https://codecov.io/gh/wickra-lib/wickra-copilot)
+[![GitHub release](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/release.svg)](https://github.com/wickra-lib/wickra-copilot/releases/latest)
+[![crates.io](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/crates.svg)](https://crates.io/crates/wickra-copilot)
+[![PyPI](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/pypi.svg)](https://pypi.org/project/wickra-copilot/)
+[![npm](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/npm.svg)](https://www.npmjs.com/package/wickra-copilot)
+[![NuGet](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/nuget.svg)](https://www.nuget.org/packages/Wickra.Copilot)
+[![Maven Central](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/maven.svg)](https://central.sonatype.com/artifact/org.wickra/wickra-copilot)
+[![Go module](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/go.svg)](https://pkg.go.dev/github.com/wickra-lib/wickra-copilot-go)
+[![R-universe](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/r-universe.svg)](https://wickra-lib.r-universe.dev)
 [![License: MIT OR Apache-2.0](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/license.svg)](#license)
 [![OpenSSF Scorecard](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/scorecard.svg)](https://scorecard.dev/viewer/?uri=github.com/wickra-lib/wickra-copilot)
-[![OpenSSF Best Practices](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/best-practices.svg)](https://www.bestpractices.dev/)
+[![OpenSSF Best Practices](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/best-practices.svg)](https://www.bestpractices.dev)
 [![Build provenance](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/provenance.svg)](https://github.com/wickra-lib/wickra-copilot/attestations)
-[![Docs](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/docs.svg)](https://wickra.org)
+[![Docs](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/docs.svg)](https://copilot.wickra.org)
+[![Verified across 10 languages](https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/verified.svg)](golden/)
 [![Live demo](https://img.shields.io/badge/live%20demo-live.wickra.org-3b82f6)](https://live.wickra.org)
 
 ---
@@ -235,3 +244,26 @@ relays it to a language model of your choosing. It is provided "as is", without
 warranty of any kind. LLM output can be wrong and is **not financial advice**; the
 copilot only reports facts and places no orders. Trading carries risk of loss;
 review the code and use at your own discretion.
+
+---
+
+<p align="center">
+  <a href="https://github.com/wickra-lib/wickra-copilot">
+    <img alt="GitHub stars" src="https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/stars.svg">
+  </a>
+  <a href="https://github.com/wickra-lib/wickra-copilot/network/members">
+    <img alt="GitHub forks" src="https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/forks.svg">
+  </a>
+  <a href="https://github.com/wickra-lib/wickra-copilot/issues">
+    <img alt="GitHub issues" src="https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/issues.svg">
+  </a>
+</p>
+
+<p align="center">
+  Built on <a href="https://github.com/wickra-lib/wickra">Wickra</a>. If it saved you time, the cheapest way to say thanks is to ⭐ the repo.
+</p>
+
+<p align="center">
+  <img alt="wickra-copilot star history" width="640"
+       src="https://raw.githubusercontent.com/wickra-lib/.github/main/profile/badges/wickra-copilot/star-history.svg">
+</p>
