@@ -44,8 +44,8 @@ categories = ["finance", "command-line-utilities"]
 # consumed from git until its first crates.io release (its tag is USER-GO gated),
 # with a `version` pinned alongside `git` so the dependency is not a wildcard
 # (cargo-deny's `bans.wildcards = deny`).
-wickra-core = "0.9"
-wickra-data = "0.9"
+wickra-core = "1.0"
+wickra-data = "1.0"
 wickra-exchange = { git = "https://github.com/wickra-lib/wickra-exchange", version = "0.1" }
 # The only name -> indicator registry in the ecosystem: the backtester's factory
 # resolves any of the 514 indicators by name + params, used to ground fact
