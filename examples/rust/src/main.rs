@@ -7,7 +7,7 @@
 
 use std::collections::BTreeMap;
 
-use copilot_core::{build_context, ContextSpec, FeedSnapshot};
+use wickra_copilot_core::{build_context, ContextSpec, FeedSnapshot};
 
 const SPEC: &str = r#"{
     "symbols": ["BTCUSDT"],
@@ -32,7 +32,7 @@ fn main() {
 
     let context = build_context(&feeds, &spec).expect("build_context");
 
-    println!("wickra-copilot {}", copilot_core::version());
+    println!("wickra-copilot {}", wickra_copilot_core::version());
     println!(
         "{}",
         serde_json::to_string(&context).expect("serialize context")

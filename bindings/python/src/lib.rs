@@ -5,7 +5,7 @@
 //! from a spec JSON, drive it with a command JSON and read back the response
 //! JSON. The same command protocol crosses every binding, so a Python front-end
 //! drives the exact same deterministic core as the native CLI. The LLM adapter
-//! (`copilot-llm`) is deliberately never exposed here, so the network and API
+//! (`wickra-copilot-llm`) is deliberately never exposed here, so the network and API
 //! key stay off the binding surface.
 
 // PyO3 protocol methods take `self` by value/ref regardless of use.
@@ -14,7 +14,7 @@
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
-use copilot_core::Copilot;
+use wickra_copilot_core::Copilot;
 
 /// A copilot instance driven by JSON commands.
 ///
@@ -46,7 +46,7 @@ impl PyCopilot {
     /// The library version.
     #[staticmethod]
     fn version() -> &'static str {
-        copilot_core::version()
+        wickra_copilot_core::version()
     }
 }
 

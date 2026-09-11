@@ -360,36 +360,8 @@ dependencies = [
 name = "copilot-bench"
 version = "0.1.0"
 dependencies = [
- "copilot-core",
  "criterion",
-]
-
-[[package]]
-name = "copilot-core"
-version = "0.1.0"
-dependencies = [
- "proptest",
- "rayon",
- "rust_decimal",
- "serde",
- "serde_json",
- "thiserror",
- "toml",
- "wickra-backtest-core",
- "wickra-core",
- "wickra-data",
- "wickra-exchange",
-]
-
-[[package]]
-name = "copilot-llm"
-version = "0.1.0"
-dependencies = [
- "copilot-core",
- "reqwest",
- "serde",
- "serde_json",
- "thiserror",
+ "wickra-copilot-core",
 ]
 
 [[package]]
@@ -2729,9 +2701,9 @@ name = "wickra-copilot"
 version = "0.1.0"
 dependencies = [
  "clap",
- "copilot-core",
- "copilot-llm",
  "serde_json",
+ "wickra-copilot-core",
+ "wickra-copilot-llm",
  "wickra-data",
  "wickra-exchange",
 ]
@@ -2740,50 +2712,78 @@ dependencies = [
 name = "wickra-copilot-ask-example"
 version = "0.1.0"
 dependencies = [
- "copilot-core",
- "copilot-llm",
  "serde_json",
+ "wickra-copilot-core",
+ "wickra-copilot-llm",
 ]
 
 [[package]]
 name = "wickra-copilot-c"
 version = "0.1.0"
 dependencies = [
- "copilot-core",
+ "wickra-copilot-core",
+]
+
+[[package]]
+name = "wickra-copilot-core"
+version = "0.1.0"
+dependencies = [
+ "proptest",
+ "rayon",
+ "rust_decimal",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "toml",
+ "wickra-backtest-core",
+ "wickra-core",
+ "wickra-data",
+ "wickra-exchange",
 ]
 
 [[package]]
 name = "wickra-copilot-example"
 version = "0.1.0"
 dependencies = [
- "copilot-core",
  "serde_json",
+ "wickra-copilot-core",
+]
+
+[[package]]
+name = "wickra-copilot-llm"
+version = "0.1.0"
+dependencies = [
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "wickra-copilot-core",
 ]
 
 [[package]]
 name = "wickra-copilot-node"
 version = "0.1.0"
 dependencies = [
- "copilot-core",
  "napi",
  "napi-build",
  "napi-derive",
+ "wickra-copilot-core",
 ]
 
 [[package]]
 name = "wickra-copilot-python"
 version = "0.1.0"
 dependencies = [
- "copilot-core",
  "pyo3",
+ "wickra-copilot-core",
 ]
 
 [[package]]
 name = "wickra-copilot-wasm"
 version = "0.1.0"
 dependencies = [
- "copilot-core",
  "wasm-bindgen",
+ "wickra-copilot-core",
 ]
 
 [[package]]

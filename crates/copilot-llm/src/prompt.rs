@@ -7,7 +7,7 @@
 //! byte output is stable and unit-testable; only `LlmProvider::complete` is
 //! non-deterministic.
 
-use copilot_core::MarketContext;
+use wickra_copilot_core::MarketContext;
 
 use crate::Message;
 
@@ -48,7 +48,7 @@ pub fn render_prompt(question: &str, ctx: &MarketContext) -> Vec<Message> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use copilot_core::{Fact, FactKind};
+    use wickra_copilot_core::{Fact, FactKind};
 
     /// A context with a single, known price-move fact — its `human` prose is
     /// fixed so the prompt bytes are fully determined.

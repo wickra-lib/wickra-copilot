@@ -27,7 +27,7 @@ env:
 
 jobs:
   # --------------------------------------------------------------------------
-  # crates.io: copilot-core then the wickra-copilot crate (CLI binary)
+  # crates.io: wickra-copilot-core then the wickra-copilot crate (CLI binary)
   # --------------------------------------------------------------------------
   cargo-publish:
     name: Publish to crates.io
@@ -43,9 +43,9 @@ jobs:
 
       # Idempotent publishing: if the version is already on crates.io we treat
       # that as success so re-runs of the workflow do not fail.
-      - name: Publish copilot-core (idempotent)
+      - name: Publish wickra-copilot-core (idempotent)
         run: |
-          out=$(cargo publish -p copilot-core --token "$CARGO_REGISTRY_TOKEN" 2>&1) && echo "$out" \
+          out=$(cargo publish -p wickra-copilot-core --token "$CARGO_REGISTRY_TOKEN" 2>&1) && echo "$out" \
             || (echo "$out" | grep -q "already uploaded\|already exists" && echo "skip: already published" \
                 || (echo "$out"; exit 1))
         env:
@@ -56,9 +56,9 @@ jobs:
 
       # The CLI depends on the swappable LLM adapter, so it must be on crates.io
       # before the CLI can publish.
-      - name: Publish copilot-llm (idempotent)
+      - name: Publish wickra-copilot-llm (idempotent)
         run: |
-          out=$(cargo publish -p copilot-llm --token "$CARGO_REGISTRY_TOKEN" 2>&1) && echo "$out" \
+          out=$(cargo publish -p wickra-copilot-llm --token "$CARGO_REGISTRY_TOKEN" 2>&1) && echo "$out" \
             || (echo "$out" | grep -q "already uploaded\|already exists" && echo "skip: already published" \
                 || (echo "$out"; exit 1))
         env:
@@ -78,8 +78,8 @@ jobs:
       # Produce .crate files for the GitHub Release attachments.
       - name: Build .crate files for release attachment
         run: |
-          cargo package -p copilot-core
-          cargo package -p copilot-llm
+          cargo package -p wickra-copilot-core
+          cargo package -p wickra-copilot-llm
           cargo package -p wickra-copilot
 
       - name: Upload .crate files
@@ -98,8 +98,8 @@ jobs:
         run: |
           cargo cyclonedx --format json --top-level
           mkdir -p sboms
-          cp crates/copilot-core/copilot-core.cdx.json sboms/
-          cp crates/copilot-llm/copilot-llm.cdx.json sboms/
+          cp crates/copilot-core/wickra-copilot-core.cdx.json sboms/
+          cp crates/copilot-llm/wickra-copilot-llm.cdx.json sboms/
           cp crates/copilot-cli/wickra-copilot.cdx.json sboms/
           ls -lh sboms/
 
@@ -138,7 +138,7 @@ jobs:
       - name: Sync root README into bindings/python so it ships with the wheel
         shell: bash
         run: cp README.md bindings/python/README.md
-      # The Python binding depends only on copilot-core without the `live`
+      # The Python binding depends only on wickra-copilot-core without the `live`
       # feature (no native networking), so the manylinux/musllinux containers
       # build the wheel with no extra system dependencies.
       - uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
@@ -787,7 +787,7 @@ jobs:
           fail_on_unmatched_files: false
           draft: true
           body: |
-            wickra-copilot ${{ github.ref_name }} — a local market copilot: a deterministic grounding core (`copilot-core`) that folds serialized microstructure feeds (order book, trades, funding, open interest, liquidations) into a byte-identical `MarketContext` of hard facts (price moves, order-book imbalance, liquidation clusters, funding flips, OI changes, volatility spikes), exposed as a JSON-over-C-ABI data API in ten languages — native Rust, Python, Node.js, WASM plus a C ABI hub for C, C++, C#, Go, Java, R — with a CLI. A separate, swappable adapter (`copilot-llm`) renders that context into a prompt and calls the user's own LLM endpoint; the LLM call is never part of the deterministic core.
+            wickra-copilot ${{ github.ref_name }} — a local market copilot: a deterministic grounding core (`wickra-copilot-core`) that folds serialized microstructure feeds (order book, trades, funding, open interest, liquidations) into a byte-identical `MarketContext` of hard facts (price moves, order-book imbalance, liquidation clusters, funding flips, OI changes, volatility spikes), exposed as a JSON-over-C-ABI data API in ten languages — native Rust, Python, Node.js, WASM plus a C ABI hub for C, C++, C#, Go, Java, R — with a CLI. A separate, swappable adapter (`wickra-copilot-llm`) renders that context into a prompt and calls the user's own LLM endpoint; the LLM call is never part of the deterministic core.
 
             ### Install
 

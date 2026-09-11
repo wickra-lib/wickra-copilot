@@ -12,11 +12,11 @@
 
 use std::collections::BTreeMap;
 
-use copilot_core::{
+use proptest::prelude::*;
+use wickra_copilot_core::{
     build_context, Candle, ContextSpec, FactKind, FeedSnapshot, FundingPoint, Liquidation, OiPoint,
     OrderbookL2, Side, Trade,
 };
-use proptest::prelude::*;
 
 fn arb_ts() -> impl Strategy<Value = i64> {
     0i64..100_000

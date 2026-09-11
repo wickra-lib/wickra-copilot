@@ -8,7 +8,7 @@
 //! fallback), producing a byte-identical `MarketContext`.
 //!
 //! The LLM call that turns that context into an answer lives in the separate,
-//! non-deterministic `copilot-llm` adapter — never here.
+//! non-deterministic `wickra-copilot-llm` adapter — never here.
 //!
 //! Everything a consumer needs is re-exported from the crate root: the `Copilot`
 //! handle and its `command_json` protocol, the free `build_context` and `query`

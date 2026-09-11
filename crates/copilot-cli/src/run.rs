@@ -1,7 +1,7 @@
 //! The run pipeline: load a spec and a feed universe, build the context, and
 //! render it — or, for `ask`, hand it to an LLM (§3.3).
 //!
-//! Only the `ask` path touches the network (through `copilot-llm`); `context`
+//! Only the `ask` path touches the network (through `wickra-copilot-llm`); `context`
 //! is fully deterministic and offline.
 
 use std::collections::BTreeMap;
@@ -10,8 +10,8 @@ use std::fs;
 use std::io::Read;
 use std::path::Path;
 
-use copilot_core::{build_context, Config, ContextSpec, FeedSnapshot, MarketContext};
-use copilot_llm::{ask, OpenAiCompatible};
+use wickra_copilot_core::{build_context, Config, ContextSpec, FeedSnapshot, MarketContext};
+use wickra_copilot_llm::{ask, OpenAiCompatible};
 
 use crate::args::{AskArgs, Cli, Command, FeedInput, Format};
 

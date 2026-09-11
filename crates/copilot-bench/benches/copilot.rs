@@ -6,11 +6,11 @@
 use std::collections::BTreeMap;
 use std::hint::black_box;
 
-use copilot_core::{
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
+use wickra_copilot_core::{
     build_context, Candle, ContextSpec, FactKind, FeedSnapshot, FundingPoint, Liquidation, OiPoint,
     OrderbookL2, Side, Trade,
 };
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
 
 const LOOKBACK: usize = 20;
 const BARS: usize = 40;

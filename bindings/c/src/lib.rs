@@ -5,7 +5,7 @@
 //! command JSONs and read back response JSONs, and free the handle. No copilot
 //! type crosses the boundary by value — the handle is opaque and the payloads are
 //! always UTF-8 JSON strings. Only the deterministic core is exposed; the LLM
-//! adapter (`copilot-llm`) is never reachable here, so the network and API key
+//! adapter (`wickra-copilot-llm`) is never reachable here, so the network and API key
 //! stay off the FFI surface entirely.
 //!
 //! Responses use a caller-owned buffer with a length-out protocol (the classic
@@ -28,7 +28,7 @@ use core::ffi::{c_char, CStr};
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::ptr;
 
-use copilot_core::Copilot;
+use wickra_copilot_core::Copilot;
 
 /// A required pointer argument (`handle` or `cmd_json`) was null.
 pub const WICKRA_COPILOT_ERR_NULL: i32 = -1;

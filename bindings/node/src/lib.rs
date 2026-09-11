@@ -4,7 +4,7 @@
 //! a spec JSON, drive it with a command JSON and read back the response JSON. The
 //! same command protocol crosses every binding, so a Node front-end drives the
 //! exact same deterministic core as the native CLI. The LLM adapter
-//! (`copilot-llm`) is deliberately never exposed here, so the network and API key
+//! (`wickra-copilot-llm`) is deliberately never exposed here, so the network and API key
 //! stay off the binding surface.
 
 #![allow(missing_debug_implementations)]
@@ -14,7 +14,7 @@
 use napi::Result;
 use napi_derive::napi;
 
-use copilot_core::Copilot as CoreCopilot;
+use wickra_copilot_core::Copilot as CoreCopilot;
 
 /// Build a napi error from a message.
 fn err(message: impl Into<String>) -> napi::Error {

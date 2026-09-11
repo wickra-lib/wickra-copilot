@@ -1,6 +1,6 @@
 # Wickra Copilot — Node.js
 
-Node.js bindings for [`copilot-core`](https://github.com/wickra-lib/wickra-copilot),
+Node.js bindings for [`wickra-copilot-core`](https://github.com/wickra-lib/wickra-copilot),
 built with [napi-rs]. The surface mirrors every other Wickra binding: build a
 `Copilot` from a spec JSON, drive it with command JSONs, and read back a ranked
 `MarketContext` of hard facts. Only the deterministic core is exposed — the LLM

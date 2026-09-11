@@ -1,5 +1,5 @@
 # Wickra Copilot — workspace.
-# A local market copilot built as one data-driven core (`copilot-core`): a serde
+# A local market copilot built as one data-driven core (`wickra-copilot-core`): a serde
 # `ContextSpec` is folded over serialized microstructure feeds (order book,
 # trades, funding, open interest, liquidations) into a deterministic
 # `MarketContext` — a stable, byte-identical list of hard facts (price moves,
@@ -8,7 +8,7 @@
 # API in ten languages, mirroring the Wickra tiering: Rust core -> native
 # Python/Node/WASM + a C ABI hub for C/C++/C#/Go/Java/R.
 #
-# A SEPARATE, swappable adapter crate (`copilot-llm`) renders the context into a
+# A SEPARATE, swappable adapter crate (`wickra-copilot-llm`) renders the context into a
 # prompt and calls the user's own LLM endpoint (Ollama / OpenAI / Claude / Gemini
 # via the OpenAI-compatible chat/completions interface, key from the environment).
 # The LLM call is non-deterministic and is never part of the golden/CI core.
@@ -54,11 +54,11 @@ wickra-exchange = { git = "https://github.com/wickra-lib/wickra-exchange", versi
 # a wildcard (cargo-deny bans.wildcards).
 wickra-backtest-core = { git = "https://github.com/wickra-lib/wickra-backtest", version = "0.1" }
 # Workspace-internal crate, referenced by the LLM adapter, CLI, bench and bindings.
-copilot-core = { version = "0.1.0", path = "crates/copilot-core" }
+wickra-copilot-core = { version = "0.1.0", path = "crates/copilot-core" }
 # The non-deterministic LLM adapter. Consumed by the CLI and desktop reference
 # consumers only — never by the C ABI or any language binding, so the network and
 # API key stay isolated from the FFI surface.
-copilot-llm = { version = "0.1.0", path = "crates/copilot-llm" }
+wickra-copilot-llm = { version = "0.1.0", path = "crates/copilot-llm" }
 # Serialization — the data-driven boundary (spec/command/context as JSON/TOML).
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -69,7 +69,7 @@ thiserror = "2"
 # Data-parallel fact derivation across the symbol universe.
 rayon = "1"
 clap = { version = "4", features = ["derive"] }
-# HTTP client for the LLM adapter ONLY (copilot-llm); the deterministic core does
+# HTTP client for the LLM adapter ONLY (wickra-copilot-llm); the deterministic core does
 # no networking. rustls (no OpenSSL), blocking, JSON.
 reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
 # C ABI header generation.

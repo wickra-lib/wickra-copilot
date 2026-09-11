@@ -9,7 +9,7 @@ use std::fmt::Debug;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 
-use copilot_core::{
+use wickra_copilot_core::{
     Candle, ContextSpec, Copilot, Fact, FactKind, FeedSnapshot, FundingPoint, Liquidation,
     MarketContext, OiPoint, OrderbookL2, Side, ToolCall, Trade,
 };

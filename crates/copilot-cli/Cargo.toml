@@ -22,15 +22,15 @@ workspace = true
 [features]
 # `live` pulls the exchange facade so the CLI can adapt a live feed into
 # snapshots; off by default (the CLI reads serialized feeds from disk/stdin).
-live = ["copilot-core/live", "dep:wickra-exchange"]
+live = ["wickra-copilot-core/live", "dep:wickra-exchange"]
 
 [dependencies]
 # Argument parsing.
 clap = { workspace = true }
 # The deterministic core: spec parsing, context building and the tool router.
-copilot-core.workspace = true
+wickra-copilot-core.workspace = true
 # The non-deterministic LLM adapter, used only by the `ask` subcommand.
-copilot-llm.workspace = true
+wickra-copilot-llm.workspace = true
 # CSV/Candle data types shared across the ecosystem.
 wickra-data.workspace = true
 # JSON rendering of the context and feed parsing.

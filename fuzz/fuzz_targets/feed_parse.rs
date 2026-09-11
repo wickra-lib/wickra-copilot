@@ -5,7 +5,7 @@
 
 use std::collections::BTreeMap;
 
-use copilot_core::FeedSnapshot;
+use wickra_copilot_core::FeedSnapshot;
 use libfuzzer_sys::fuzz_target;
 
 fuzz_target!(|data: &[u8]| {

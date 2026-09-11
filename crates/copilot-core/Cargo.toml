@@ -1,5 +1,5 @@
 [package]
-name = "copilot-core"
+name = "wickra-copilot-core"
 description = "Data-driven core of the Wickra Copilot: a serde ContextSpec folded over microstructure feed snapshots into a deterministic MarketContext of hard facts (price moves, order-book imbalance, liquidation clusters, funding flips, OI changes, volatility spikes)."
 version.workspace = true
 edition.workspace = true

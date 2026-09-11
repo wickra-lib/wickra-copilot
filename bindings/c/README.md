@@ -1,9 +1,9 @@
 # Wickra Copilot — C ABI
 
 The C ABI is the hub every C-capable language (C, C++, C#, Go, Java, R) links
-against. It exposes `copilot-core` as a tiny, JSON-shaped surface built as both a
+against. It exposes `wickra-copilot-core` as a tiny, JSON-shaped surface built as both a
 `cdylib` (dynamic library) and a `staticlib`. Only the deterministic core is
-exposed — the LLM adapter (`copilot-llm`) is never reachable over the FFI, so the
+exposed — the LLM adapter (`wickra-copilot-llm`) is never reachable over the FFI, so the
 network and API key stay off this surface entirely.
 
 ## Surface

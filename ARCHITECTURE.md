@@ -58,7 +58,7 @@ parallel and sequential builds: `BTreeMap` in every output path, the fact vector
 stably sorted (severity then symbol key), no RNG, and reductions run serially in
 key order rather than rayon order. That determinism is what lets the golden corpus
 pin the context byte-for-byte. **The LLM call is never part of it** — it is
-non-deterministic by nature and lives entirely in the separate `copilot-llm`
+non-deterministic by nature and lives entirely in the separate `wickra-copilot-llm`
 adapter.
 
 ## The command boundary
@@ -72,7 +72,7 @@ JSON reformatting.
 
 ## The LLM adapter
 
-`copilot-llm` renders a `MarketContext` into a prompt and calls the user's chosen
+`wickra-copilot-llm` renders a `MarketContext` into a prompt and calls the user's chosen
 LLM over the OpenAI-compatible `chat/completions` interface. Four providers are
 selectable (`ollama` / `openai` / `claude` / `gemini`, plus `custom`); each preset
 only sets the `base_url` (overridable via the environment), so one HTTP

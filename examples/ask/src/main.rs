@@ -22,8 +22,8 @@
 
 use std::collections::BTreeMap;
 
-use copilot_core::{build_context, ContextSpec, FeedSnapshot};
-use copilot_llm::{ask, OpenAiCompatible, Provider};
+use wickra_copilot_core::{build_context, ContextSpec, FeedSnapshot};
+use wickra_copilot_llm::{ask, OpenAiCompatible, Provider};
 
 const SPEC: &str = r#"{
     "symbols": ["BTCUSDT"],

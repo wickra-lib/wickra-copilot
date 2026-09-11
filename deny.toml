@@ -25,7 +25,7 @@ confidence-threshold = 0.93
 # Scoped license exceptions for individual permissive / public-domain crates:
 #   - webpki-roots (CDLA-Permissive-2.0): the Mozilla CA certificate bundle as
 #     data, pulled in transitively by the rustls TLS stack — both the exchange's
-#     `live` feature and the LLM adapter's reqwest client (copilot-llm) use it.
+#     `live` feature and the LLM adapter's reqwest client (wickra-copilot-llm) use it.
 exceptions = [
     { allow = ["CDLA-Permissive-2.0"], crate = "webpki-roots" },
 ]

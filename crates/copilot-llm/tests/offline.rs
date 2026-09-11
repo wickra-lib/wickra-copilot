@@ -5,8 +5,10 @@
 //! attaches to an answer, but they are deliberately **not** a golden of the
 //! model's text (that is non-deterministic and network-bound).
 
-use copilot_core::{Fact, FactKind, MarketContext};
-use copilot_llm::{ask, render_prompt, LlmProvider, Message, OpenAiCompatible, Provider, Result};
+use wickra_copilot_core::{Fact, FactKind, MarketContext};
+use wickra_copilot_llm::{
+    ask, render_prompt, LlmProvider, Message, OpenAiCompatible, Provider, Result,
+};
 
 /// A single-fact context whose `human` prose is fixed, so the rendered prompt is
 /// fully determined.

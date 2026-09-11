@@ -35,7 +35,7 @@ makes an **outbound network request** to a user-configured endpoint.
   liquidation streams sourced through `wickra-exchange` are public market data;
   they add a network read but no credentials or orders, and their contents are
   validated like any other untrusted input.
-- **Adapter → LLM endpoint.** The `copilot-llm` adapter makes an outbound HTTPS
+- **Adapter → LLM endpoint.** The `wickra-copilot-llm` adapter makes an outbound HTTPS
   request carrying the rendered prompt and, for cloud providers, the API key. The
   key travels **only** to the configured `base_url`. Selecting a `custom` endpoint
   is an explicit user decision, and the key (and the market context) go to

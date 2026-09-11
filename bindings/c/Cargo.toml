@@ -38,4 +38,4 @@ cast_possible_wrap = "allow"
 similar_names = "allow"
 
 [dependencies]
-copilot-core = { workspace = true }
+wickra-copilot-core = { workspace = true }
