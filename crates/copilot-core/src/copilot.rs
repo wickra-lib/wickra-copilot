@@ -2,7 +2,7 @@
 //! JSON-in / JSON-out entry point every binding drives.
 //!
 //! Only the deterministic context builder and the tool router go through this
-//! surface; the LLM `ask` lives in the separate `copilot-llm` crate so the core
+//! surface; the LLM `ask` lives in the separate `wickra-copilot-llm` crate so the core
 //! and bindings stay network- and key-free. Domain errors are returned in-band
 //! as `{"ok":false,"error":...}`, never as a panic.
 

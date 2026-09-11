@@ -22,7 +22,7 @@ recent published version once a release exists.
 
 ## API key handling
 
-The LLM adapter (`copilot-llm`) needs a provider API key for the cloud providers
+The LLM adapter (`wickra-copilot-llm`) needs a provider API key for the cloud providers
 (OpenAI / Claude / Gemini; Ollama is local and needs none). That key is treated
 as a secret end to end:
 

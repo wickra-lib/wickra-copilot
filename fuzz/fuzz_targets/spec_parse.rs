@@ -3,7 +3,7 @@
 //! (JSON and TOML) and as a config. None must panic; malformed input must
 //! surface as a clean `Err`.
 
-use copilot_core::{Config, ContextSpec};
+use wickra_copilot_core::{Config, ContextSpec};
 use libfuzzer_sys::fuzz_target;
 
 fuzz_target!(|data: &[u8]| {

@@ -7,16 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Two of the three published crates carried names the release could not
+  upload.** `copilot-core` and `copilot-llm` are outside the org's crates.io
+  token scope, which creates new crates under the `wickra-` prefix only;
+  `cargo publish` on either returns 403 at upload while `--dry-run` passes,
+  and because the publish jobs run in parallel the release would have landed
+  on PyPI, npm, NuGet, Maven Central and the Go mirror without ever reaching
+  crates.io. They are now `wickra-copilot-core` and `wickra-copilot-llm`, the
+  shape of every released sibling. Directories keep their names; only the
+  packages and the `wickra_copilot_core` / `wickra_copilot_llm` paths moved.
+  The same audit ran across the family (xray paid for this with its first
+  tag).
+
 ### Added
 
-- The `copilot-core` deterministic core: `ContextSpec` (JSON/TOML), the six fact
+- The `wickra-copilot-core` deterministic core: `ContextSpec` (JSON/TOML), the six fact
   derivations (price move, order-book imbalance, liquidation cluster, funding
   flip, open-interest change, volatility spike), each with a fixed significance
   threshold and a byte-pinned English `human` sentence, assembled into a ranked
   `MarketContext`, and the `Copilot::command` JSON-over-C-ABI protocol
   (`set_spec`, `build_context`/`facts`, `query`, `reset`, `version`). The
   parallel (rayon) and sequential builds are byte-for-byte identical.
-- `copilot-llm`: a separate LLM adapter — never reachable over the C ABI — with
+- `wickra-copilot-llm`: a separate LLM adapter — never reachable over the C ABI — with
   four provider presets (Ollama, OpenAI, Claude, Gemini) plus a custom endpoint,
   driven by one OpenAI-compatible client, configured through the
   `WICKRA_COPILOT_API_KEY` / `_BASE_URL` / `_MODEL` environment variables. Local

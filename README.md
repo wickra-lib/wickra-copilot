@@ -33,7 +33,7 @@
 
 > **Part of the [Wickra ecosystem](https://github.com/wickra-lib):** the same data-driven core and ten-language binding surface also power [wickra-exchange](https://github.com/wickra-lib/wickra-exchange), [wickra-backtest](https://github.com/wickra-lib/wickra-backtest), [wickra-terminal](https://github.com/wickra-lib/wickra-terminal) and 20 more — see [the full list](https://github.com/wickra-lib).
 
-Wickra Copilot is one data-driven core, [`copilot-core`](crates/copilot-core): a
+Wickra Copilot is one data-driven core, [`wickra-copilot-core`](crates/copilot-core): a
 serde `ContextSpec` is folded over real microstructure feeds ([`wickra-core`](https://github.com/wickra-lib/wickra)
 + [`wickra-exchange`](https://github.com/wickra-lib/wickra-exchange)) into a
 `MarketContext` — a list of hard, numeric **facts**: price moves, order-book
@@ -52,7 +52,7 @@ Node.js, WASM, C, C++, C#, Go, Java and R**, with a reference CLI.
 - **Deterministic core** — the `MarketContext` fact list is the only golden-tested
   surface; it is identical across all ten languages and both build profiles.
 - **Separate LLM adapter** — the network call lives in a distinct crate
-  ([`copilot-llm`](crates/copilot-llm)); it never crosses the C ABI. The
+  ([`wickra-copilot-llm`](crates/copilot-llm)); it never crosses the C ABI. The
   deterministic core has no network, no key, no I/O.
 - **Local tool, your own key** — not a hosted service and not a SaaS. It runs
   locally and calls an LLM endpoint with **your** API key, read from the
@@ -132,7 +132,7 @@ but it can never invent the numbers — they are pinned by the golden corpus.
 
 ## LLM adapter — choose your provider, keep your key
 
-The network call is a separate, swappable crate, [`copilot-llm`](crates/copilot-llm),
+The network call is a separate, swappable crate, [`wickra-copilot-llm`](crates/copilot-llm),
 consumed by the CLI's `ask` subcommand. It ships four provider presets plus a
 `custom` one:
 

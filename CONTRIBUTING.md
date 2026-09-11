@@ -36,7 +36,7 @@ cargo fmt --all
 cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo clippy --workspace --all-targets --no-default-features -- -D warnings   # WASM path (no rayon, no adapter networking)
 cargo test --workspace --all-features
-cargo test -p copilot-core --no-default-features                              # sequential == parallel (context builder)
+cargo test -p wickra-copilot-core --no-default-features                              # sequential == parallel (context builder)
 cargo deny check
 ```
 

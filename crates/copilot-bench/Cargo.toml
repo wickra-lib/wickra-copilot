@@ -16,10 +16,10 @@ workspace = true
 # Toggle the core's parallel fold so `cargo bench` (default) measures the rayon
 # path and `cargo bench --no-default-features` measures the sequential one.
 default = ["parallel"]
-parallel = ["copilot-core/parallel"]
+parallel = ["wickra-copilot-core/parallel"]
 
 [dependencies]
-copilot-core = { path = "../copilot-core", version = "0.1.0", default-features = false }
+wickra-copilot-core = { path = "../copilot-core", version = "0.1.0", default-features = false }
 
 [dev-dependencies]
 criterion.workspace = true

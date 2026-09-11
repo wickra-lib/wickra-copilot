@@ -9,12 +9,12 @@ complete.
 
 0. **Scaffold** — workspace, governance, supply-chain config, `.github`
    scaffolding. *In progress.*
-1. **`copilot-core`** — the `ContextSpec`, the feed model, the six facts
+1. **`wickra-copilot-core`** — the `ContextSpec`, the feed model, the six facts
    (price move, order-book imbalance, liquidation cluster, funding flip, OI
    change, volatility spike), the deterministic `FactBuilder` into a
    `MarketContext`, the `ToolCatalog`, and the `command_json` boundary, with
    near-total coverage via inline tests.
-2. **`copilot-llm`** — the separate, non-deterministic adapter: a provider
+2. **`wickra-copilot-llm`** — the separate, non-deterministic adapter: a provider
    abstraction with four presets (Ollama / OpenAI / Claude / Gemini, plus custom)
    over one OpenAI-compatible HTTP path, and a prompt renderer that grounds the
    model in the `MarketContext`. Exercised only by offline tests.

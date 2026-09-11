@@ -3,8 +3,8 @@
 The top-level [ARCHITECTURE.md](../ARCHITECTURE.md) gives the high-level shape;
 this page covers how the product actually turns a spec + a feed universe into a
 grounded answer. There are **two clearly separated halves**: a deterministic core
-(`copilot-core`) that everything is built on, and a non-deterministic LLM adapter
-(`copilot-llm`) that only the CLI touches. The C ABI and the ten language
+(`wickra-copilot-core`) that everything is built on, and a non-deterministic LLM adapter
+(`wickra-copilot-llm`) that only the CLI touches. The C ABI and the ten language
 bindings wrap **only the core**.
 
 ## The pipeline
@@ -26,7 +26,7 @@ the exact bytes every binding returns from a build_context command
    │
    │   ── the deterministic boundary ends here ──
    ▼
-copilot-llm: render_prompt(context) → provider.ask() → answer   (CLI `ask` only)
+wickra-copilot-llm: render_prompt(context) → provider.ask() → answer   (CLI `ask` only)
 ```
 
 - **`ContextSpec`** (`crates/copilot-core/src/spec.rs`) — `symbols`, `lookback`, an optional `timeframe`, and the `facts` to derive. Construction rejects an empty symbol list, an empty fact list and a zero lookback.
@@ -65,7 +65,7 @@ byte-identical across every language.
 
 ## The LLM boundary
 
-`copilot-llm` is a **separate crate**, not reachable over the C ABI. It renders
+`wickra-copilot-llm` is a **separate crate**, not reachable over the C ABI. It renders
 the deterministic `MarketContext` into a prompt and calls one OpenAI-compatible
 endpoint chosen by a `Provider` preset. The API key is read from the environment
 and never logged. Only the CLI's `ask` subcommand links it; the bindings cannot

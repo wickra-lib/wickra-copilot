@@ -11,7 +11,7 @@ Python, Node.js, WASM, C, C++, C#, Go, Java and R.
 > **The golden covers only the grounding core, never the LLM.** It pins the
 > `MarketContext` (the facts and their `human` strings) that the copilot feeds to
 > a model. The model's answer is non-deterministic and network-bound and is
-> deliberately **not** part of any golden. The `copilot-llm` tests only pin the
+> deliberately **not** part of any golden. The `wickra-copilot-llm` tests only pin the
 > rendered prompt bytes and the API-key redaction, offline.
 
 ## Files

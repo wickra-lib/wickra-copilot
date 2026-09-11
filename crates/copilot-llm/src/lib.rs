@@ -1,6 +1,6 @@
 //! Non-deterministic LLM adapter for the Wickra Copilot.
 //!
-//! `copilot-core` produces a deterministic `MarketContext` — a stable, ranked
+//! `wickra-copilot-core` produces a deterministic `MarketContext` — a stable, ranked
 //! list of hard facts. This crate is the *only* place that turns that context
 //! into a natural-language answer: it renders the facts into a prompt and calls
 //! the user's own OpenAI-compatible endpoint (Ollama, OpenAI, Claude or Gemini),
@@ -25,7 +25,7 @@
 
 use serde::Serialize;
 
-use copilot_core::{query, MarketContext, ToolCall};
+use wickra_copilot_core::{query, MarketContext, ToolCall};
 
 mod prompt;
 mod provider;
@@ -110,8 +110,8 @@ pub fn ask(provider: &dyn LlmProvider, question: &str, ctx: &MarketContext) -> R
 #[cfg(test)]
 mod tests {
     use super::*;
-    use copilot_core::{build_context, ContextSpec, FactKind, FeedSnapshot};
     use std::collections::BTreeMap;
+    use wickra_copilot_core::{build_context, ContextSpec, FactKind, FeedSnapshot};
 
     /// An offline provider that echoes a fixed reply — no network, deterministic.
     struct FakeProvider {

@@ -15,7 +15,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use copilot_core::Copilot;
+use wickra_copilot_core::Copilot;
 
 /// The repository-root `golden/` directory, resolved from this crate's manifest.
 fn golden_dir() -> PathBuf {

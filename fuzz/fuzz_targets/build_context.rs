@@ -5,7 +5,7 @@
 
 use std::collections::BTreeMap;
 
-use copilot_core::{build_context, ContextSpec, FeedSnapshot};
+use wickra_copilot_core::{build_context, ContextSpec, FeedSnapshot};
 use libfuzzer_sys::fuzz_target;
 use serde::Deserialize;
 

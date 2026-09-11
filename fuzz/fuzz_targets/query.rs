@@ -4,7 +4,7 @@
 //! keyword routing and must never panic — it only ever returns tool calls for
 //! kinds and symbols already present in the context.
 
-use copilot_core::{query, MarketContext};
+use wickra_copilot_core::{query, MarketContext};
 use libfuzzer_sys::fuzz_target;
 use serde::Deserialize;
 

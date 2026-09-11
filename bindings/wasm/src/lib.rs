@@ -4,7 +4,7 @@
 //! browser: build a `Copilot` from a spec JSON, drive it with a command JSON and
 //! read back the response JSON. The same command protocol crosses every binding,
 //! so a browser front-end drives the exact same core as the native CLI. The LLM
-//! adapter (`copilot-llm`) is never exposed here, so the network and API key stay
+//! adapter (`wickra-copilot-llm`) is never exposed here, so the network and API key stay
 //! off the binding surface.
 //!
 //! The `parallel` feature of the core is disabled here: rayon's thread pool is
@@ -14,7 +14,7 @@
 
 use wasm_bindgen::prelude::*;
 
-use copilot_core::Copilot as CoreCopilot;
+use wickra_copilot_core::Copilot as CoreCopilot;
 
 /// A copilot instance driven by JSON commands.
 #[wasm_bindgen]

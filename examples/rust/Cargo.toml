@@ -15,5 +15,5 @@ name = "context"
 path = "src/main.rs"
 
 [dependencies]
-copilot-core = { workspace = true }
+wickra-copilot-core = { workspace = true }
 serde_json = { workspace = true }

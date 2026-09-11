@@ -8,7 +8,7 @@ use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand, ValueEnum};
 
-use copilot_llm::Provider;
+use wickra_copilot_llm::Provider;
 
 /// Build a deterministic market context from microstructure feeds, and
 /// optionally ask an LLM to explain it.

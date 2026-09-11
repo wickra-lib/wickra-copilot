@@ -15,6 +15,6 @@ name = "ask"
 path = "src/main.rs"
 
 [dependencies]
-copilot-core = { workspace = true }
-copilot-llm = { workspace = true }
+wickra-copilot-core = { workspace = true }
+wickra-copilot-llm = { workspace = true }
 serde_json = { workspace = true }

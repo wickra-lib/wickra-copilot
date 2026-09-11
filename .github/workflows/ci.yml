@@ -36,7 +36,7 @@ jobs:
       - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
       # The PyO3 extension cdylib is built and tested by the `python` job via
       # maturin; the C ABI cdylib by the `c-abi` job. Exclude both here. The
-      # deterministic core and the (offline) copilot-llm adapter are tested here.
+      # deterministic core and the (offline) wickra-copilot-llm adapter are tested here.
       - run: cargo build --workspace ${{ matrix.features }} --exclude wickra-copilot-python --exclude wickra-copilot-c
       - run: cargo test --workspace ${{ matrix.features }} --exclude wickra-copilot-python --exclude wickra-copilot-c
 
@@ -119,7 +119,7 @@ jobs:
       - name: Generate coverage (lcov)
         run: >
           cargo llvm-cov --no-default-features
-          -p copilot-core
+          -p wickra-copilot-core
           --lcov --output-path lcov.info
       - name: Upload to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0

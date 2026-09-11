@@ -44,7 +44,7 @@ there is no rpath.
 
 The [`ask/`](ask/) example goes one step further: it grounds the same context and
 then asks a real LLM to answer *only* from those facts, through the separate
-`copilot-llm` adapter. It is the one example that talks to the network, so it is
+`wickra-copilot-llm` adapter. It is the one example that talks to the network, so it is
 **not** part of CI — it compiles there but is only ever run locally. It defaults
 to a local [Ollama](https://ollama.com) server (no API key):
 

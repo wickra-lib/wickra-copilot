@@ -1,5 +1,5 @@
 [package]
-name = "copilot-llm"
+name = "wickra-copilot-llm"
 description = "Non-deterministic LLM adapter for the Wickra Copilot: renders a deterministic MarketContext into a prompt and calls the user's own OpenAI-compatible endpoint (Ollama / OpenAI / Claude / Gemini), key from the environment. Never part of the golden/CI core and never reachable over the C ABI."
 version.workspace = true
 edition.workspace = true
@@ -18,7 +18,7 @@ workspace = true
 [dependencies]
 # The deterministic core: the MarketContext this adapter grounds its prompt on,
 # and the `query` router that fills an answer's tool calls.
-copilot-core.workspace = true
+wickra-copilot-core.workspace = true
 # Prompt / request / response serialization for the chat/completions call.
 serde.workspace = true
 serde_json.workspace = true
