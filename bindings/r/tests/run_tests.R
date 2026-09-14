@@ -45,8 +45,7 @@ stopifnot(grepl('"ok":false', inband, fixed = TRUE))
 ## read back the context, and assert the response equals
 ## golden/expected/<spec>.json byte-for-byte. The binding returns the core's
 ## compact command output verbatim, so byte equality is the exact cross-language
-## parity check. The fixtures arrive in a later phase; until then the golden
-## section is skipped.
+## parity check. A missing corpus is a failure, not a skip.
 golden_dir <- function() {
   d <- normalizePath(getwd(), mustWork = FALSE)
   for (i in seq_len(8)) {
@@ -60,21 +59,48 @@ golden_dir <- function() {
 }
 
 g <- golden_dir()
-if (!is.null(g)) {
-  feeds <- trimws(paste(
-    readLines(file.path(g, "feeds.json"), warn = FALSE), collapse = "\n"
+stopifnot(!is.null(g))
+feeds <- trimws(paste(
+  readLines(file.path(g, "feeds.json"), warn = FALSE), collapse = "\n"
+))
+build_all <- paste0('{"cmd":"build_context","feeds":', feeds, '}')
+for (spec_path in list.files(file.path(g, "specs"), pattern = "\\.json$", full.names = TRUE)) {
+  name <- basename(spec_path)
+  spec_json <- paste(readLines(spec_path, warn = FALSE), collapse = "\n")
+  expected <- trimws(paste(
+    readLines(file.path(g, "expected", name), warn = FALSE), collapse = "\n"
   ))
-  build_all <- paste0('{"cmd":"build_context","feeds":', feeds, '}')
-  for (spec_path in list.files(file.path(g, "specs"), pattern = "\\.json$", full.names = TRUE)) {
-    name <- basename(spec_path)
-    spec_json <- paste(readLines(spec_path, warn = FALSE), collapse = "\n")
-    expected <- trimws(paste(
-      readLines(file.path(g, "expected", name), warn = FALSE), collapse = "\n"
-    ))
-    gcopilot <- wkcopilot_new(spec_json)
-    got <- wkcopilot_command(gcopilot, build_all)
-    stopifnot(identical(trimws(got), expected))
-  }
+  gcopilot <- wkcopilot_new(spec_json)
+  got <- wkcopilot_command(gcopilot, build_all)
+  stopifnot(identical(trimws(got), expected))
 }
 
 cat("wickra-copilot R tests passed\n")
+
+## Operating-mode equivalence over the golden corpus: `facts` is an alias of
+## `build_context`, and `query` answers the same against the context the handle
+## stored as against a context passed inline. The core pins this in Rust; this
+## checks the boundary the R binding crosses. The command JSON is assembled as
+## text, with the context the core returned spliced in verbatim, so no JSON
+## package is needed. A missing corpus is a failure, not a skip.
+stopifnot(!is.null(g))
+question <- '"what moved and why?"'
+for (spec_path in list.files(file.path(g, "specs"), pattern = "\\.json$", full.names = TRUE)) {
+  name <- basename(spec_path)
+  spec_json <- paste(readLines(spec_path, warn = FALSE), collapse = "\n")
+  expected <- trimws(paste(
+    readLines(file.path(g, "expected", name), warn = FALSE), collapse = "\n"
+  ))
+  stored <- wkcopilot_new(spec_json)
+  built <- trimws(wkcopilot_command(stored, build_all))
+  stopifnot(identical(built, expected))
+  from_stored <- wkcopilot_command(stored, paste0('{"cmd":"query","question":', question, '}'))
+  fresh <- wkcopilot_new(spec_json)
+  from_inline <- wkcopilot_command(
+    fresh, paste0('{"cmd":"query","question":', question, ',"context":', built, '}')
+  )
+  stopifnot(identical(from_inline, from_stored))
+  alias <- wkcopilot_new(spec_json)
+  stopifnot(identical(trimws(wkcopilot_command(alias, paste0('{"cmd":"facts","feeds":', feeds, '}'))), built))
+}
+cat("wickra-copilot R operating modes: inline equals stored\n")

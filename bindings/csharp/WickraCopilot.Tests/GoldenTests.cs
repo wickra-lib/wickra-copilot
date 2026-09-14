@@ -30,19 +30,16 @@ public class GoldenTests
     public void GoldenContexts_AreByteIdentical()
     {
         string? golden = FindGolden();
-        if (golden is null)
-        {
-            return; // golden fixtures not present
-        }
+        Assert.NotNull(golden);
 
-        string feedsJson = File.ReadAllText(Path.Combine(golden, "feeds.json"));
+        string feedsJson = File.ReadAllText(Path.Combine(golden!, "feeds.json"));
         using JsonDocument feeds = JsonDocument.Parse(feedsJson);
 
-        foreach (string specPath in Directory.GetFiles(Path.Combine(golden, "specs"), "*.json"))
+        foreach (string specPath in Directory.GetFiles(Path.Combine(golden!, "specs"), "*.json"))
         {
             string spec = File.ReadAllText(specPath);
             string name = Path.GetFileName(specPath);
-            string expected = File.ReadAllText(Path.Combine(golden, "expected", name)).TrimEnd();
+            string expected = File.ReadAllText(Path.Combine(golden!, "expected", name)).TrimEnd();
 
             using var copilot = new Copilot(spec);
             string build = JsonSerializer.Serialize(new { cmd = "build_context", feeds = feeds.RootElement });

@@ -32,7 +32,7 @@ func goldenDir() string {
 func TestGoldenParity(t *testing.T) {
 	g := goldenDir()
 	if g == "" {
-		t.Skip("golden fixtures not present")
+		t.Fatal("golden corpus not found")
 	}
 	feeds, err := os.ReadFile(filepath.Join(g, "feeds.json"))
 	if err != nil {
