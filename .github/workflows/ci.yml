@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    branches: [main]
 
 permissions:
   contents: read
@@ -21,11 +22,12 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         features: ["--all-features", "--no-default-features"]
     runs-on: ${{ matrix.os }}
-    # The copilot-cli binary (wickra-copilot) and the C ABI cdylib
-    # (wickra_copilot) share a stem on Windows, so building both in one
-    # --workspace pass can race on the same .pdb and trip LNK1201. Dropping debug
-    # info (tests do not need it) removes the collision and keeps runner disk use
-    # down; RUSTFLAGS is part of the cache key.
+    timeout-minutes: 30 # backstop against a wedged job, not a budget
+    # The CLI binary (wickra-copilot) and the C ABI cdylib (wickra_copilot) share a
+    # stem on Windows, so building both in one --workspace pass can race on the
+    # same .pdb and trip LNK1201. Dropping debug info (tests do not need it)
+    # removes the collision and keeps runner disk use down; RUSTFLAGS is part of
+    # the cache key.
     env:
       RUSTFLAGS: "-C debuginfo=0"
     steps:
@@ -33,16 +35,16 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup-rust
-      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       # The PyO3 extension cdylib is built and tested by the `python` job via
-      # maturin; the C ABI cdylib by the `c-abi` job. Exclude both here. The
-      # deterministic core and the (offline) wickra-copilot-llm adapter are tested here.
+      # maturin; the C ABI cdylib by the `c-abi` job. Exclude both here.
       - run: cargo build --workspace ${{ matrix.features }} --exclude wickra-copilot-python --exclude wickra-copilot-c
       - run: cargo test --workspace ${{ matrix.features }} --exclude wickra-copilot-python --exclude wickra-copilot-c
 
   lint:
     name: Format & Clippy
     runs-on: ubuntu-latest
+    timeout-minutes: 15 # backstop against a wedged job, not a budget
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -50,7 +52,7 @@ jobs:
       - uses: ./.github/actions/setup-rust
         with:
           components: rustfmt, clippy
-      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       - run: cargo fmt --all -- --check
       - run: cargo clippy --workspace --all-targets --all-features -- -D warnings
       - run: cargo clippy --workspace --all-targets --no-default-features -- -D warnings
@@ -58,6 +60,7 @@ jobs:
   msrv:
     name: MSRV workspace (1.86)
     runs-on: ubuntu-latest
+    timeout-minutes: 30 # backstop against a wedged job, not a budget
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -65,7 +68,7 @@ jobs:
       - uses: ./.github/actions/setup-rust
         with:
           toolchain: "1.86"
-      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       # The Node binding (napi 3) needs Rust 1.88 and is checked separately; the
       # Python binding needs maturin's platform link flags and is built by the
       # `python` job. The library, CLI, C ABI and WASM stay at 1.86.
@@ -77,6 +80,7 @@ jobs:
   msrv-node:
     name: MSRV node (1.88)
     runs-on: ubuntu-latest
+    timeout-minutes: 30 # backstop against a wedged job, not a budget
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -84,24 +88,51 @@ jobs:
       - uses: ./.github/actions/setup-rust
         with:
           toolchain: "1.88"
-      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       - run: cargo build -p wickra-copilot-node
 
   supply-chain:
     name: cargo-deny
     runs-on: ubuntu-latest
+    timeout-minutes: 15 # backstop against a wedged job, not a budget
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: taiki-e/install-action@3d7d7cd5ac7f994c1892ae0c06165095b9139094 # v2.85.1
+      - uses: taiki-e/install-action@e67fa11c4b9316fa714ddf0abed07a0c3143b95b # v2.87.4
         with:
           tool: cargo-deny
       - run: cargo deny check
 
+      # osv-scanner.toml exists in this repository and nothing ran it. The file
+      # records the advisories assessed as not affecting the project, with the
+      # reasoning beside each -- an assessment that was load-bearing for nobody,
+      # because no workflow ever consulted it.
+      #
+      # cargo-deny above covers the Rust graph only. This covers the other
+      # ecosystems the repository ships into -- npm, PyPI, Maven, NuGet, Go
+      # modules, R -- which had no vulnerability scanning in CI at all.
+      #
+      # --no-resolve turns off transitive resolution of *manifests*. The default
+      # enricher resolves each pom.xml against Maven Central, and ours depend on
+      # an org.wickra artefact at the version in the tree, which does not exist
+      # there until the release publishes it. Without the flag every version
+      # bump fails this job on a lookup for the artefact the bump exists to
+      # create. Everything pinned in a lockfile is still scanned in full and
+      # transitively, because a lockfile needs no resolution.
+      - name: osv-scanner
+        uses: google/osv-scanner-action/osv-scanner-action@6e4298ebc4db23e847df9b2e2de2939d6f066c67 # v2.5.1
+        with:
+          scan-args: |-
+            --recursive
+            --no-resolve
+            --config=osv-scanner.toml
+            ./
+
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
+    timeout-minutes: 45 # backstop against a wedged job, not a budget
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -109,16 +140,16 @@ jobs:
       - uses: ./.github/actions/setup-rust
         with:
           components: llvm-tools-preview
-      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@3d7d7cd5ac7f994c1892ae0c06165095b9139094 # v2.85.1
+        uses: taiki-e/install-action@e67fa11c4b9316fa714ddf0abed07a0c3143b95b # v2.87.4
         with:
           tool: cargo-llvm-cov
-      # Measure the core in its sequential (no rayon) configuration — the report
-      # is byte-identical either way, and this keeps coverage deterministic.
+      # The moat lives in wickra-copilot-core: canonicalization + hashing + prove/verify.
+      # Measure it in isolation so patch coverage tracks the deterministic core.
       - name: Generate coverage (lcov)
         run: >
-          cargo llvm-cov --no-default-features
+          cargo llvm-cov
           -p wickra-copilot-core
           --lcov --output-path lcov.info
       - name: Upload to Codecov
@@ -136,6 +167,7 @@ jobs:
   fuzz-smoke:
     name: Fuzz (smoke)
     runs-on: ubuntu-latest
+    timeout-minutes: 45 # backstop against a wedged job, not a budget
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -143,24 +175,30 @@ jobs:
       - uses: ./.github/actions/setup-rust
         with:
           toolchain: nightly
-      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: fuzz
       - name: Install cargo-fuzz
-        uses: taiki-e/install-action@3d7d7cd5ac7f994c1892ae0c06165095b9139094 # v2.85.1
+        uses: taiki-e/install-action@e67fa11c4b9316fa714ddf0abed07a0c3143b95b # v2.87.4
         with:
           tool: cargo-fuzz
+      - name: Fuzz build_context (30 s)
+        run: cargo +nightly fuzz run --target x86_64-unknown-linux-gnu build_context -- -max_total_time=30
+      - name: Fuzz feed_parse (30 s)
+        run: cargo +nightly fuzz run --target x86_64-unknown-linux-gnu feed_parse -- -max_total_time=30
+      - name: Fuzz query (30 s)
+        run: cargo +nightly fuzz run --target x86_64-unknown-linux-gnu query -- -max_total_time=30
       - name: Fuzz spec_parse (30 s)
         run: cargo +nightly fuzz run --target x86_64-unknown-linux-gnu spec_parse -- -max_total_time=30
         working-directory: fuzz
-      - name: Fuzz feed_parse (30 s)
-        run: cargo +nightly fuzz run --target x86_64-unknown-linux-gnu feed_parse -- -max_total_time=30
+      - name: Fuzz canonicalize (30 s)
+        run: cargo +nightly fuzz run --target x86_64-unknown-linux-gnu canonicalize -- -max_total_time=30
         working-directory: fuzz
-      - name: Fuzz build_context (30 s)
-        run: cargo +nightly fuzz run --target x86_64-unknown-linux-gnu build_context -- -max_total_time=30
+      - name: Fuzz prove (30 s)
+        run: cargo +nightly fuzz run --target x86_64-unknown-linux-gnu prove -- -max_total_time=30
         working-directory: fuzz
-      - name: Fuzz query (30 s)
-        run: cargo +nightly fuzz run --target x86_64-unknown-linux-gnu query -- -max_total_time=30
+      - name: Fuzz verify_roundtrip (30 s)
+        run: cargo +nightly fuzz run --target x86_64-unknown-linux-gnu verify_roundtrip -- -max_total_time=30
         working-directory: fuzz
 
   python:
@@ -171,6 +209,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.9", "3.11", "3.12", "3.13"]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30 # backstop against a wedged job, not a budget
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -179,12 +218,37 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: ./.github/actions/setup-rust
-      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
-      - run: pip install maturin pytest
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      # The build and test tools come from the hash-locked requirements file
+      # Dependabot maintains, not from whatever PyPI resolves today. No
+      # `pip install --upgrade pip` first: that fetch is itself unpinned.
+      - name: Install Python dev dependencies
+        shell: bash
+        run: |
+          # Hash-locked dev tooling, split by Python version: a resolution for
+          # 3.9 is not one for 3.13, and the 3.9 lock carries no pytest (see
+          # ci-dev-py39.in). Refresh both with scripts/update-lockfiles.sh.
+          if [ "${{ matrix.python-version }}" = "3.9" ]; then
+            python -m pip install --require-hashes -r .github/requirements/ci-dev-py39.txt
+          else
+            python -m pip install --require-hashes -r .github/requirements/ci-dev-py3.txt
+          fi
       - run: maturin build --out dist
         working-directory: bindings/python
-      - run: pip install --no-index --find-links bindings/python/dist wickra-copilot
-      - run: pytest bindings/python/tests -q
+      # The wheel this job just built; --no-index means nothing is fetched.
+      - run: python -m pip install --no-index --find-links bindings/python/dist wickra-copilot
+      # 3.10 and up run the suite under pytest. The 3.9 row cannot: pytest 9.x
+      # requires 3.10, so pinning it there would mean carrying a version below
+      # the fix for GHSA-6w46-j5rx-g56g with no backport. It runs the same
+      # modules through run_without_pytest.py -- plain functions, plain asserts.
+      - name: Test the binding
+        shell: bash
+        run: |
+          if [ "${{ matrix.python-version }}" = "3.9" ]; then
+            python bindings/python/tests/run_without_pytest.py
+          else
+            pytest bindings/python/tests -q
+          fi
 
   node:
     name: Node ${{ matrix.node-version }} on ${{ matrix.os }}
@@ -194,12 +258,13 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         node-version: ["22", "24"]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30 # backstop against a wedged job, not a budget
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup-rust
-      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ matrix.node-version }}
@@ -218,10 +283,39 @@ jobs:
         run: cd bindings/node && git diff --exit-code -- index.js index.d.ts
       - name: Run Node tests
         run: cd bindings/node && node --test
+      # `files` lists `*.node`, so the main tarball is supposed to carry the
+      # native binary rather than resolve it through the optionalDependencies.
+      # Nothing held that promise: a name dropped from `files` is not an error,
+      # it is a package that installs and then cannot load. Check the tarball
+      # the release would upload, on the platform whose binary it carries.
+      - name: The npm tarball carries the module it promises
+        shell: bash
+        working-directory: bindings/node
+        run: |
+          # The ${...} below are JavaScript template literals inside node -e,
+          # not shell expansions -- single quotes are what keeps the shell out
+          # of them. The reason goes on its own line: shellcheck reads anything
+          # after the directive as further directives and reports SC1072 on it.
+          # shellcheck disable=SC2016
+          npm pack --dry-run --json | node -e '
+            const chunks = [];
+            process.stdin.on("data", c => chunks.push(c)).on("end", () => {
+              const pkg = JSON.parse(chunks.join(""))[0];
+              const names = pkg.files.map(f => f.path);
+              const required = ["index.js", "index.d.ts", "package.json"];
+              const missing = required.filter(n => !names.includes(n));
+              if (!names.some(n => n.endsWith(".node"))) missing.push("the native .node binary");
+              if (missing.length) {
+                console.error(`::error::${pkg.name} would publish without ${missing.join(", ")}`);
+                process.exit(1);
+              }
+              console.log(`${pkg.name}: ${names.length} files, entry points present`);
+            });'
 
   wasm:
     name: WASM
     runs-on: ubuntu-latest
+    timeout-minutes: 45 # backstop against a wedged job, not a budget
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -229,13 +323,46 @@ jobs:
       - uses: ./.github/actions/setup-rust
         with:
           targets: wasm32-unknown-unknown
-      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       - name: Install wasm-pack
-        uses: taiki-e/install-action@3d7d7cd5ac7f994c1892ae0c06165095b9139094 # v2.85.1
+        uses: taiki-e/install-action@e67fa11c4b9316fa714ddf0abed07a0c3143b95b # v2.87.4
         with:
           tool: wasm-pack
-      - name: Build the wasm binding
+      - name: Build the wasm binding (web target)
         run: wasm-pack build --target web
+        working-directory: bindings/wasm
+      # A second build for node makes the module loadable without a browser;
+      # `pkg/` stays what ships. The tests beside the binding then prove every
+      # golden spec through the wasm core and assert the context is
+      # byte-identical to golden/expected/*.json -- the same bytes the native
+      # bindings produce -- and that a query answers the same whether its
+      # context was stored by the handle or passed inline.
+      - name: Build the wasm binding (nodejs target)
+        run: wasm-pack build --target nodejs --out-dir pkg-node
+        working-directory: bindings/wasm
+      # The toolchain download flakes on the runners often enough that a retry
+      # with no code change is the standard fix, the same way the node and
+      # examples jobs handle it.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        id: setup_node_wasm
+        continue-on-error: true
+        with:
+          node-version: "22"
+      - name: Pause before retrying the toolchain download
+        if: steps.setup_node_wasm.outcome == 'failure'
+        run: sleep 30
+        shell: bash
+      - name: Retry the toolchain download
+        if: steps.setup_node_wasm.outcome == 'failure'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+      # An explicit glob rather than `node --test tests/`: Node 22 reads a bare
+      # directory argument as a module path and fails with MODULE_NOT_FOUND,
+      # while Node 20 scans it. The glob behaves the same on both.
+      - name: Run the wasm tests
+        shell: bash
+        run: node --test tests/*.test.js
         working-directory: bindings/wasm
 
   c-abi:
@@ -245,14 +372,15 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30 # backstop against a wedged job, not a budget
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup-rust
-      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       - name: Install cbindgen
-        uses: taiki-e/install-action@3d7d7cd5ac7f994c1892ae0c06165095b9139094 # v2.85.1
+        uses: taiki-e/install-action@e67fa11c4b9316fa714ddf0abed07a0c3143b95b # v2.87.4
         with:
           tool: cbindgen
       - name: Build the C ABI library (cdylib + staticlib)
@@ -283,6 +411,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30 # backstop against a wedged job, not a budget
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -292,7 +421,7 @@ jobs:
           go-version: "stable"
           cache: false
       - uses: ./.github/actions/setup-rust
-      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       - name: Build the C ABI library
         run: cargo build -p wickra-copilot-c --release
       - name: Vendored header in sync with the C ABI
@@ -340,12 +469,13 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45 # backstop against a wedged job, not a budget
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup-rust
-      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: "8.0"
@@ -363,16 +493,17 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45 # backstop against a wedged job, not a budget
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup-rust
-      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
-      # The pom points native.lib.dir at target/release, so build the release profile.
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      # The pom points native.lib.dir at target/debug, so build the debug profile.
       - name: Build the C ABI library
-        run: cargo build -p wickra-copilot-c --release
-      - uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
+        run: cargo build -p wickra-copilot-c
+      - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
         with:
           distribution: temurin
           java-version: "25"
@@ -387,6 +518,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30 # backstop against a wedged job, not a budget
     env:
       WKCOPILOT_INC: ${{ github.workspace }}/bindings/c/include
       WKCOPILOT_LIB: ${{ github.workspace }}/target/release
@@ -395,10 +527,10 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup-rust
-      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       - name: Build the C ABI library
         run: cargo build -p wickra-copilot-c --release
-      - uses: r-lib/actions/setup-r@d3c5be51b12e724e68f33216ca3c148b66d5f0b6 # v2.12.1
+      - uses: r-lib/actions/setup-r@465b7d8e732ca3921382b1674c59bada9cbf3399 # v2.13.0
         with:
           r-version: "release"
           use-public-rspm: true
@@ -411,10 +543,306 @@ jobs:
           export WKCOPILOT_INC="${WKCOPILOT_INC//\\//}"
           export WKCOPILOT_LIB="${WKCOPILOT_LIB//\\//}"
           if command -v cygpath >/dev/null 2>&1; then
-            export PATH="$(cygpath -u "$WKCOPILOT_LIB"):$PATH"
+            WKCOPILOT_LIB_UNIX=$(cygpath -u "$WKCOPILOT_LIB")
+            export PATH="$WKCOPILOT_LIB_UNIX:$PATH"
           else
             export LD_LIBRARY_PATH="$WKCOPILOT_LIB:$LD_LIBRARY_PATH"
             export DYLD_LIBRARY_PATH="$WKCOPILOT_LIB:$DYLD_LIBRARY_PATH"
           fi
           R CMD INSTALL bindings/r
           Rscript bindings/r/tests/run_tests.R
+
+  # A check script nobody runs is a file, not a check. Each of these reads what
+  # the repository actually ships and each found something on its first run:
+  # a published wheel that declared a licence it did not carry, and version
+  # declarations that had drifted apart across six ecosystems.
+  repo-checks:
+    name: Repository checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15 # backstop against a wedged job, not a budget
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Versions agree across every manifest
+        run: python scripts/check_version_sync.py
+      - name: Published packages carry their licence texts
+        run: python scripts/check_license_copies.py
+      - name: Binding READMEs link only to what travels with them
+        run: python scripts/check_readme_links.py
+
+  # links.yml runs this on a schedule against the whole tree; this is the
+  # pull-request half, so a README that gains a dead link is caught in review
+  # rather than by a nightly nobody is watching. Non-blocking on purpose: an
+  # external host being down is not this repository's defect.
+  links:
+    name: External links (non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 10 # backstop against a wedged job, not a budget
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: --config lychee.toml --no-progress --root-dir "${{ github.workspace }}" "*.md" "bindings/*/README.md"
+          fail: true
+
+  # The published API is a promise the version number makes. Nothing checked
+  # that a patch release keeps it, and a rename that slips through review goes
+  # out to six registries in one irreversible run.
+  semver:
+    name: Public API (cargo-semver-checks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30 # backstop: it builds rustdoc JSON for each crate and its baseline
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-rust
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - name: Install cargo-semver-checks
+        uses: taiki-e/install-action@c3ec0de9ae7f1019cea21aa96aa0a895b9552063 # v2.87.9
+        timeout-minutes: 10 # fail fast on a stuck download instead of hanging the job
+        with:
+          tool: cargo-semver-checks
+
+      # Named explicitly rather than --workspace: the bench and binding crates
+      # are not published, so they promise nothing and have no baseline.
+      #
+      # A crate with no release yet has no baseline either, and
+      # cargo-semver-checks fails rather than saying so. That is the honest
+      # state of this repository today, not a defect -- an unpublished crate
+      # cannot have broken its published API. So each crate is checked only
+      # once it exists on crates.io, and the job says which ones it skipped.
+      # The moment the first release lands, this starts guarding for real.
+      - name: Check the published crates
+        shell: bash
+        run: |
+          set -euo pipefail
+          checked=0
+          # Library crates only: the CLI is a binary with no public API, and
+          # cargo-semver-checks ends with "no crates with library targets
+          # selected" on it -- an error, not a pass -- once it is on crates.io
+          # and the loop reaches it.
+          for crate in wickra-copilot-core; do
+            if curl -fsS -A "wickra-ci" "https://crates.io/api/v1/crates/$crate" >/dev/null 2>&1; then
+              echo "::group::cargo semver-checks $crate"
+              cargo semver-checks check-release -p "$crate"
+              echo "::endgroup::"
+              checked=$((checked + 1))
+            else
+              echo "::notice::$crate is not on crates.io yet; no baseline to compare against"
+            fi
+          done
+          echo "$checked crate(s) compared against their published baseline"
+
+  # The release builds the Linux wheels inside manylinux and musllinux images.
+  # Nothing else does, so a wheel that only fails there -- a missing system
+  # library, a Perl module OpenSSL's Configure wants -- is invisible until the
+  # tag, where it is already too late. This builds the same two images on every
+  # pull request.
+  python-wheel-container-smoke:
+    name: Python wheel (${{ matrix.manylinux }} smoke)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45 # backstop: vendored OpenSSL adds a from-source compile
+    strategy:
+      fail-fast: false
+      matrix:
+        manylinux: [auto, musllinux_1_2]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Sync root README into bindings/python so the build matches release
+        run: cp README.md bindings/python/README.md
+      - uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
+        with:
+          working-directory: bindings/python
+          target: x86_64
+          args: --release --out dist
+          manylinux: ${{ matrix.manylinux }}
+          # Building OpenSSL from source needs Perl modules the minimal
+          # manylinux image lacks. The musllinux cross image ships a complete
+          # Perl and has no yum, so this is a no-op there.
+          before-script-linux: |
+            if command -v yum >/dev/null 2>&1; then yum install -y perl-core perl-IPC-Cmd perl-Data-Dumper perl-Time-Piece; fi
+
+  # The examples are what a reader copies. Nothing built them, so one could rot
+  # against an API change and stay green -- the worst kind of documentation,
+  # because it looks executable. This compiles each of them; it does not run
+  # them, since several want a network or a built native library.
+  examples:
+    name: Examples
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-rust
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+
+      - name: Warm cargo registry (retry transient DNS/registry flakes)
+        shell: bash
+        # CARGO_NET_RETRY rides out short blips, but a longer runner DNS outage
+        # outlasts cargo's rapid in-process retries: the crates.io index fetch
+        # the first cargo step does ("Could not resolve host: index.crates.io")
+        # then fails the whole job. Pre-fetch the dependency graph here with real
+        # backoff, so the steps after it resolve from the warmed local cache.
+        run: |
+          for attempt in 1 2 3 4 5; do
+            if cargo fetch; then exit 0; fi
+            echo "::warning::cargo fetch failed (attempt $attempt/5) -- likely a registry/DNS flake; retrying in $((attempt * 20))s..."
+            sleep $((attempt * 20))
+          done
+          echo "::error::cargo fetch still failing after 5 attempts"
+          exit 1
+
+      - name: Build the C ABI library the non-native bindings link against
+        run: cargo build -p wickra-copilot-c --release
+
+      - name: Stage the native library for Go and put it on the loader path
+        shell: bash
+        run: |
+          mkdir -p bindings/go/lib/linux_amd64
+          cp target/release/libwickra_copilot.so bindings/go/lib/linux_amd64/
+          echo "LD_LIBRARY_PATH=$PWD/target/release:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
+
+      # examples/README.md promises one report_hash for every language. Read it
+      # once and hold each example that prints the hash to it, so the document
+      # and the code cannot drift apart: an engine bump that changes the hash
+      # fails here until the README says the new one.
+      - name: The version every example must print
+        shell: bash
+        run: |
+          version=$(sed -n 's/^version = "\([0-9][^"]*\)"/\1/p' Cargo.toml | head -n1)
+          test -n "$version"
+          echo "EXAMPLE_VERSION=$version" >> "$GITHUB_ENV"
+          echo "every example must print wickra-copilot $version"
+
+      - name: Rust
+        shell: bash
+        run: |
+          out=$(cargo run -q --manifest-path examples/rust/Cargo.toml)
+          echo "$out"
+          echo "$out" | grep -q "wickra-copilot $EXAMPLE_VERSION"
+          echo "$out" | grep -q 'facts'
+      # examples/ask grounds the same context and then asks a real model, so it
+      # is compiled here and run only locally: the answer is network-bound and
+      # non-deterministic, and no key or Ollama server exists on a runner. The
+      # adapter surface it uses must keep building, which this holds.
+      - name: Rust (the ask example compiles; it runs only locally)
+        run: cargo build -q --manifest-path examples/ask/Cargo.toml
+
+      # `maturin develop` wants a virtualenv; the python job builds a wheel and
+      # installs it instead, which needs none. Same route here.
+      - name: Python
+        shell: bash
+        run: |
+          # No `pip install --upgrade pip` first: that fetch is itself unpinned,
+          # which is what the hash-locked file below exists to avoid, and the
+          # runner image ships a pip far newer than --require-hashes needs.
+          python -m pip install --require-hashes -r .github/requirements/ci-dev-py3.txt
+          ( cd bindings/python && maturin build --release --out dist )
+          python -m pip install --no-index --find-links bindings/python/dist wickra-copilot
+          out=$(python examples/python/context.py)
+          echo "$out"
+          echo "$out" | grep -q "wickra-copilot $EXAMPLE_VERSION"
+          echo "$out" | grep -q 'facts'
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        id: setup_node_examples
+        continue-on-error: true
+        with:
+          node-version: "22"
+      - name: Pause before retrying the toolchain download
+        if: steps.setup_node_examples.outcome == 'failure'
+        run: sleep 30
+        shell: bash
+      - name: Retry the toolchain download
+        if: steps.setup_node_examples.outcome == 'failure'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+      - name: Node.js
+        shell: bash
+        run: |
+          ( cd bindings/node && npm install --no-audit --no-fund && npx napi build --platform --release )
+          ( cd examples/node && npm install --no-audit --no-fund )
+          out=$(node examples/node/context.js)
+          echo "$out"
+          echo "$out" | grep -q "wickra-copilot $EXAMPLE_VERSION"
+          echo "$out" | grep -q 'facts'
+
+      # The browser demo embeds an ES module, and nothing else in this repository
+      # parses a script inside an HTML file. Extract it and parse-check it, so a
+      # broken edit to the in-page logic fails here rather than in a reader's
+      # browser. It cannot be *run* here for the same reason the others can: it
+      # needs a DOM and a fetched .wasm, which is a headless browser, not a step.
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: "1.23"
+      - name: Go
+        shell: bash
+        run: |
+          out=$(cd examples/go && go run .)
+          echo "$out"
+          echo "$out" | grep -q "wickra-copilot $EXAMPLE_VERSION"
+          echo "$out" | grep -q 'facts'
+
+      - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: "22"
+      - name: Java
+        shell: bash
+        run: |
+          mvn -f bindings/java/pom.xml -q package -DskipTests
+          javac -cp bindings/java/target/classes examples/java/Context.java -d examples/java/out
+          out=$(java --enable-native-access=ALL-UNNAMED \
+            -Dnative.lib.dir="$PWD/target/release" \
+            -cp "bindings/java/target/classes:examples/java/out" Context)
+          echo "$out"
+          echo "$out" | grep -q "wickra-copilot $EXAMPLE_VERSION"
+          echo "$out" | grep -q 'facts'
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: "8.0.x"
+      - name: C#
+        shell: bash
+        run: |
+          out=$(dotnet run --project examples/csharp/Context)
+          echo "$out"
+          echo "$out" | grep -q "wickra-copilot $EXAMPLE_VERSION"
+          echo "$out" | grep -q 'facts'
+
+      - uses: r-lib/actions/setup-r@465b7d8e732ca3921382b1674c59bada9cbf3399 # v2.13.0
+        with:
+          use-public-rspm: true
+      - name: R
+        shell: bash
+        env:
+          WKCOPILOT_INC: ${{ github.workspace }}/bindings/c/include
+          WKCOPILOT_LIB: ${{ github.workspace }}/target/release
+        run: |
+          R CMD INSTALL bindings/r
+          out=$(Rscript examples/r/context.R)
+          echo "$out"
+          echo "$out" | grep -q "wickra-copilot $EXAMPLE_VERSION"
+          echo "$out" | grep -q 'facts'
+
+  binding-surface:
+    name: Binding surface parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 15 # backstop against a wedged job, not a budget
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Every binding exposes the same surface
+        run: python scripts/check_binding_surface.py
+      - name: The R wrapper matches the C ABI header
+        run: python scripts/check_r_abi_skew.py

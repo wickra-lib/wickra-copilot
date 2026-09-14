@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>wickra-copilot WASM — build a market context</title>
+  <style>
+    body { font-family: ui-sans-serif, system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; color: #1d1d1d; }
+    h1 { margin-bottom: .25rem; }
+    .meta { color: #666; margin-top: 0; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1rem; font-variant-numeric: tabular-nums; }
+    th, td { border: 1px solid #ddd; padding: .5rem .75rem; text-align: right; }
+    th:first-child, td:first-child { text-align: left; }
+    th { background: #fafafa; }
+    code { background: #f4f4f4; padding: .1rem .25rem; border-radius: .2rem; font-size: .9em; }
+    pre { background: #f6f8fa; padding: .75rem; border-radius: .3rem; overflow-x: auto; }
+    button { padding: .5rem 1rem; }
+    #status { margin-top: 1rem; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>wickra-copilot WASM — build a market context</h1>
+  <p class="meta">
+    The same example every other language carries: a three-bar BTC dump
+    (100 → 97 → 94) folded into a <code>MarketContext</code> of hard facts. The
+    context is data, not code, so the bytes here are the same bytes the CLI
+    and every other binding return for these feeds — and a <code>query</code>
+    answers the same whether the handle stored the context or it travels
+    inline with the question.
+  </p>
+
+  <p><button id="go" disabled>Build context</button></p>
+  <p id="status">Loading WASM module…</p>
+
+  <table id="facts" hidden>
+    <thead><tr><th>Symbol</th><th>Kind</th><th>Value</th><th>Human</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <pre id="raw" hidden></pre>
+
+  <script type="module">
+    import init, { Copilot, version }
+      from "../../bindings/wasm/pkg/wickra_copilot_wasm.js";
+
+    const SPEC = JSON.stringify({
+      symbols: ["BTCUSDT"],
+      lookback: 3,
+      facts: ["price_move"],
+    });
+
+    // A three-bar BTC dump (100 -> 94), fed inline as a build_context command.
+    const FEEDS = {
+      BTCUSDT: {
+        symbol: "BTCUSDT",
+        candles: [
+          { ts: 1, open: 100.0, high: 100.0, low: 100.0, close: 100.0, volume: 1.0 },
+          { ts: 2, open: 97.0, high: 97.0, low: 97.0, close: 97.0, volume: 1.0 },
+          { ts: 3, open: 94.0, high: 94.0, low: 94.0, close: 94.0, volume: 1.0 },
+        ],
+      },
+    };
+    const QUESTION = "why did BTC dump";
+
+    const status = document.getElementById("status");
+    const go = document.getElementById("go");
+
+    function run() {
+      // Build once; the handle stores the context for later queries. A fresh
+      // copilot per run, so clicking twice does not build on top of old state.
+      const stored = new Copilot(SPEC);
+      const built = stored.command(JSON.stringify({ cmd: "build_context", feeds: FEEDS }));
+      const fromStored = stored.command(JSON.stringify({ cmd: "query", question: QUESTION }));
+
+      // A fresh handle never builds; the context travels inline with the query.
+      const fresh = new Copilot(SPEC);
+      const fromInline = fresh.command(
+        JSON.stringify({ cmd: "query", question: QUESTION, context: JSON.parse(built) }),
+      );
+      if (fromInline !== fromStored) {
+        throw new Error("inline and stored contexts disagree");
+      }
+
+      const context = JSON.parse(built);
+      const body = document.querySelector("#facts tbody");
+      body.replaceChildren();
+      for (const fact of context.facts) {
+        const tr = document.createElement("tr");
+        const cells = [fact.symbol, fact.kind, fact.value, fact.human];
+        for (const cell of cells) {
+          const td = document.createElement("td");
+          td.textContent = String(cell);
+          tr.append(td);
+        }
+        body.append(tr);
+      }
+      document.getElementById("facts").hidden = false;
+
+      const raw = document.getElementById("raw");
+      raw.textContent = JSON.stringify({ context, tool_calls: JSON.parse(fromStored).tool_calls }, null, 2);
+      raw.hidden = false;
+
+      status.textContent =
+        `${context.facts.length} fact(s) over ${context.symbols.length} symbol(s), inline equals stored — wickra-copilot ${version()}.`;
+    }
+
+    await init();
+    status.textContent = `Module ready — wickra-copilot ${version()}.`;
+    go.disabled = false;
+    go.addEventListener("click", () => {
+      try {
+        run();
+      } catch (err) {
+        status.textContent = `Error: ${err}`;
+      }
+    });
+  </script>
+</body>
+</html>
