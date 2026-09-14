@@ -25,8 +25,9 @@
   "files": [
     "index.js",
     "index.d.ts",
-    "npm",
-    "*.node"
+    "*.node",
+    "LICENSE-MIT",
+    "LICENSE-APACHE"
   ],
   "napi": {
     "name": "wickra-copilot",
@@ -61,6 +62,6 @@
     "test": "node --test"
   },
   "devDependencies": {
-    "@napi-rs/cli": "^3.7.4"
+    "@napi-rs/cli": "^3.9.0"
   }
 }

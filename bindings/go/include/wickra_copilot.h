@@ -51,6 +51,7 @@ void wickra_copilot_free(WickraCopilot *handle);
 // response and a trailing NUL have been written to `out`; otherwise `out` is
 // left untouched and the caller should re-call with a `cap` of at least
 // `len + 1`. Pass `out = NULL`, `cap = 0` to query the length without writing.
+// A mutating command is executed exactly once across all such retries.
 //
 // # Safety
 // `handle` must be a valid handle; `cmd_json` a valid NUL-terminated C string;

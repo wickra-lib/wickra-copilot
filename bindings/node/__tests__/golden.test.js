@@ -24,12 +24,9 @@ function findGolden() {
   return null;
 }
 
-test("golden contexts are byte-identical", (t) => {
+test("golden contexts are byte-identical", () => {
   const golden = findGolden();
-  if (!golden) {
-    t.skip("golden fixtures not present");
-    return;
-  }
+  assert.ok(golden, "golden corpus not found");
   const feeds = fs.readFileSync(path.join(golden, "feeds.json"), "utf8");
   const specDir = path.join(golden, "specs");
   for (const file of fs.readdirSync(specDir).filter((f) => f.endsWith(".json"))) {

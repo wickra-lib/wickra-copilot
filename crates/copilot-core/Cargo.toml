@@ -12,6 +12,10 @@ readme.workspace = true
 keywords.workspace = true
 categories.workspace = true
 
+# docs.rs builds with every feature on, so the whole surface is documented.
+[package.metadata.docs.rs]
+all-features = true
+
 [lints]
 workspace = true
 

@@ -1,0 +1,130 @@
+#!/bin/sh
+# Resolve the Wickra C ABI (header + shared library) for the Unix build.
+#
+# Self-contained by default: download the prebuilt wickra-copilot-c-<triple>.tar.gz
+# release asset that matches this package's version and stage the shared library
+# into src/ so the compiled wickra_copilot.so links against it and bundles it (via
+# install.libs.R), found post-install through an rpath ($ORIGIN on Linux,
+# @loader_path on macOS). Set WKCOPILOT_INC + WKCOPILOT_LIB to build
+# against a locally built C ABI instead (dev override; e.g.
+# `cargo build -p wickra-copilot-c --release`). Download/extract uses base R (always
+# present at build time), so there is no curl/wget system dependency.
+set -e
+
+inc=""
+lib=""
+
+# A freshly-cut GitHub release can briefly return 404 while its assets propagate
+# across the CDN, and a transient network blip should not fail the build either.
+# Retry base R's download.file with a backoff (~2 min total) instead of giving up
+# on the first miss.
+wickra_copilot_download() {
+  _url="$1"
+  _dest="$2"
+  _attempt=1
+  while [ "${_attempt}" -le 6 ]; do
+    if "${R_HOME}/bin/Rscript" -e "download.file('${_url}', '${_dest}', mode = 'wb', quiet = TRUE)"; then
+      return 0
+    fi
+    echo "wickra-copilot: download attempt ${_attempt}/6 failed (${_url}); the release asset may still be propagating — retrying in 20s..."
+    sleep 20
+    _attempt=$((_attempt + 1))
+  done
+  echo "wickra-copilot: failed to download ${_url} after 6 attempts"
+  return 1
+}
+
+# WebAssembly (r-universe / webR): there is no prebuilt wasm C ABI to download,
+# but the build image ships cargo (/usr/local/cargo/bin) and emscripten
+# (EMSDK on PATH), so build the C ABI staticlib from source for
+# wasm32-unknown-emscripten right here. Building it in the same image with the
+# same emscripten avoids any ABI/version mismatch a prebuilt lib would risk.
+# rayon (threads) is dropped via --no-default-features; the indicators are pure
+# computation, so the serial path is functionally identical.
+if [ "$(uname -s)" = "Emscripten" ]; then
+  version=$(sed -n 's/^Version:[[:space:]]*//p' DESCRIPTION)
+  echo "wickra-copilot: building C ABI from source for wasm32-unknown-emscripten (v${version})"
+  build=$(mktemp -d)
+  url="https://github.com/wickra-lib/wickra-copilot/archive/refs/tags/v${version}.tar.gz"
+  wickra_copilot_download "${url}" "${build}/src.tar.gz" || exit 1
+  "${R_HOME}/bin/Rscript" -e "untar('${build}/src.tar.gz', exdir = '${build}')"
+  root="${build}/wickra-copilot-${version}"
+  rustup target add wasm32-unknown-emscripten 2>/dev/null || true
+  ( cd "${root}" && cargo build -p wickra-copilot-c --release \
+      --target wasm32-unknown-emscripten --no-default-features ) \
+    || { echo "wickra-copilot: cargo wasm build failed"; exit 1; }
+  cp "${root}/bindings/c/include/wickra_copilot.h" src/wickra_copilot.h
+  cp "${root}/target/wasm32-unknown-emscripten/release/libwickra_copilot.a" src/libwickra_copilot.a
+  rm -rf "${build}"
+  # The static archive is linked into the package object; no shared lib to
+  # bundle and no rpath needed.
+  sed "s|@WICKRA_RPATH@||" src/Makevars.in > src/Makevars
+  exit 0
+fi
+
+if [ -n "${WKCOPILOT_INC}" ] && [ -n "${WKCOPILOT_LIB}" ]; then
+  echo "wickra-copilot: using C ABI from WKCOPILOT_INC / WKCOPILOT_LIB (dev override)"
+  inc="${WKCOPILOT_INC}"
+  lib="${WKCOPILOT_LIB}"
+else
+  version=$(sed -n 's/^Version:[[:space:]]*//p' DESCRIPTION)
+  os=$(uname -s)
+  arch=$(uname -m)
+  case "${os}" in
+    Linux)
+      case "${arch}" in
+        x86_64) triple="x86_64-unknown-linux-gnu" ;;
+        aarch64 | arm64) triple="aarch64-unknown-linux-gnu" ;;
+        *) echo "wickra-copilot: unsupported Linux arch '${arch}' — set WKCOPILOT_INC/WKCOPILOT_LIB"; exit 1 ;;
+      esac
+      ;;
+    Darwin)
+      case "${arch}" in
+        x86_64) triple="x86_64-apple-darwin" ;;
+        arm64 | aarch64) triple="aarch64-apple-darwin" ;;
+        *) echo "wickra-copilot: unsupported macOS arch '${arch}' — set WKCOPILOT_INC/WKCOPILOT_LIB"; exit 1 ;;
+      esac
+      ;;
+    *)
+      echo "wickra-copilot: unsupported OS '${os}' — set WKCOPILOT_INC/WKCOPILOT_LIB"
+      exit 1
+      ;;
+  esac
+  url="https://github.com/wickra-lib/wickra-copilot/releases/download/v${version}/wickra-copilot-c-${triple}.tar.gz"
+  echo "wickra-copilot: downloading C ABI ${triple} for v${version}"
+  wickra_copilot_download "${url}" "src/wickra-copilot-c.tar.gz" || exit 1
+  "${R_HOME}/bin/Rscript" -e "untar('src/wickra-copilot-c.tar.gz', exdir = 'src/wickra-copilot-c')"
+  inc="src/wickra-copilot-c/wickra-copilot-c-${triple}/include"
+  lib="src/wickra-copilot-c/wickra-copilot-c-${triple}/lib"
+fi
+
+# Stage the header and the platform shared library into src/ so the package
+# object links with -L. -lwickra_copilot and install.libs.R bundles the lib.
+cp "${inc}/wickra_copilot.h" src/wickra_copilot.h
+staged=""
+for f in libwickra_copilot.so libwickra_copilot.dylib; do
+  if [ -f "${lib}/${f}" ]; then
+    cp "${lib}/${f}" "src/${f}"
+    staged="${f}"
+  fi
+done
+if [ -z "${staged}" ]; then
+  echo "wickra-copilot: no libwickra_copilot.so/.dylib found under ${lib}"
+  exit 1
+fi
+
+# rpath so the bundled lib is found next to wickra_copilot.so after install.
+case "$(uname -s)" in
+  Darwin)
+    rpath="-Wl,-rpath,@loader_path"
+    # Normalise the dylib id to @rpath so @loader_path resolution applies.
+    install_name_tool -id "@rpath/${staged}" "src/${staged}" 2>/dev/null || true
+    ;;
+  *)
+    rpath="-Wl,-rpath,'\$\$ORIGIN'"
+    ;;
+esac
+
+sed "s|@WICKRA_RPATH@|${rpath}|" src/Makevars.in > src/Makevars
+echo "wickra-copilot: configured (bundled ${staged})"
+exit 0

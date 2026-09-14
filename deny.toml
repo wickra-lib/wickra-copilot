@@ -38,8 +38,4 @@ wildcards = "deny"
 unknown-registry = "deny"
 unknown-git = "deny"
 
-# The exchange facade and the backtest indicator registry are consumed as git
-# dependencies until their first crates.io release; they live under the project's
-# own GitHub org.
-[sources.allow-org]
-github = ["wickra-lib"]
+# Every dependency comes from crates.io; no git source is allowed.

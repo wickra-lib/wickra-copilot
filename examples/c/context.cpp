@@ -1,10 +1,20 @@
-// A minimal C++ example: build a market context through the wickra-copilot C ABI.
-#include <cstddef>
-#include <iostream>
+// A minimal C++ example: build a market context, then ask the same question
+// against the stored context and against the context passed inline -- both
+// through the C++ hull.
+//
+// This goes through `wickra_copilot.hpp`, the C++ hull shipped beside the C
+// header, because that hull is what a C++ caller is meant to use: it owns and
+// frees the handle, runs the two-call length protocol behind
+// `wickra_copilot_command` for you -- the core carries the produced-but-
+// undelivered response between the two calls, so a mutating `build_context`
+// runs once, not twice -- and turns a refusal into an exception rather than a
+// negative integer that is easy to ignore. Calling the C functions directly
+// from C++ works too, but then the hull would be shipped without anything
+// building it.
+#include <cstdio>
 #include <string>
-#include <vector>
 
-#include "wickra_copilot.h"
+#include "wickra_copilot.hpp"
 
 namespace {
 const char *SPEC =
@@ -17,32 +27,36 @@ const char *BUILD =
     R"({"ts":2,"open":97,"high":97,"low":97,"close":97,"volume":1},)"
     R"({"ts":3,"open":94,"high":94,"low":94,"close":94,"volume":1}]}}})";
 
-// Length-out protocol: learn the length, then read into a caller buffer.
-std::string run(WickraCopilot *copilot, const char *cmd) {
-    int len = wickra_copilot_command(copilot, cmd, nullptr, 0);
-    if (len < 0) {
-        std::cerr << "command failed: code " << len << "\n";
-        return {};
-    }
-    std::vector<char> buf(static_cast<std::size_t>(len) + 1);
-    wickra_copilot_command(copilot, cmd, buf.data(),
-                           static_cast<std::size_t>(buf.size()));
-    return std::string(buf.data());
-}
+const char *QUESTION = "why did BTC dump";
 }  // namespace
 
 int main() {
-    WickraCopilot *copilot = wickra_copilot_new(SPEC);
-    if (copilot == nullptr) {
-        std::cerr << "failed to build copilot\n";
+    try {
+        std::printf("wickra-copilot %s\n", wickra::Copilot::version().c_str());
+
+        // Build once; the handle stores the context for later queries.
+        wickra::Copilot copilot(SPEC);
+        const std::string context = copilot.command(BUILD);
+        std::printf("context: %s\n", context.c_str());
+        const std::string from_stored =
+            copilot.command(std::string(R"({"cmd":"query","question":")") + QUESTION + "\"}");
+
+        // A fresh handle never builds; the context travels inline with the query.
+        wickra::Copilot fresh(SPEC);
+        const std::string from_inline = fresh.command(
+            std::string(R"({"cmd":"query","question":")") + QUESTION + R"(","context":)" + context + "}");
+        std::printf("tool_calls: %s\n", from_stored.c_str());
+
+        // Both ways of carrying the context answer the same.
+        if (from_stored != from_inline) {
+            std::fprintf(stderr, "inline and stored contexts disagree\n");
+            return 1;
+        }
+    } catch (const wickra::CopilotError &err) {
+        // Every failure arrives here: a spec the core rejects, a command it does
+        // not understand, a call that returned a negative code.
+        std::fprintf(stderr, "%s\n", err.what());
         return 1;
     }
-
-    std::string context = run(copilot, BUILD);
-
-    std::cout << "wickra-copilot " << wickra_copilot_version() << "\n";
-    std::cout << "context: " << context << "\n";
-
-    wickra_copilot_free(copilot);
     return 0;
 }

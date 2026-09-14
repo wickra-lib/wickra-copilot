@@ -1,0 +1,137 @@
+#!/bin/sh
+# Windows build: the package compiles to wickra_copilot.dll, which would collide with the
+# C ABI's own wickra_copilot.dll (the loader would resolve the import to the package
+# itself). Stage a renamed copy, wickra_copilot_abi.dll, into src/ and build an import
+# library that references it by that name. install.libs.R then bundles the DLL.
+#
+# Self-contained by default: download the prebuilt wickra-copilot-c-<triple>.tar.gz
+# release asset matching this package's version. Set WKCOPILOT_INC +
+# WKCOPILOT_LIB to build against a locally built C ABI instead (dev override).
+set -e
+
+# A freshly-cut GitHub release can briefly return 404 while its assets propagate
+# across the CDN, and a transient network blip should not fail the build either.
+# Retry base R's download.file with a backoff (~2 min total) instead of giving up
+# on the first miss.
+wickra_copilot_download() {
+  _url="$1"
+  _dest="$2"
+  _attempt=1
+  while [ "${_attempt}" -le 6 ]; do
+    if "${R_HOME}/bin/Rscript" -e "download.file('${_url}', '${_dest}', mode = 'wb', quiet = TRUE)"; then
+      return 0
+    fi
+    echo "wickra-copilot: download attempt ${_attempt}/6 failed (${_url}); the release asset may still be propagating — retrying in 20s..."
+    sleep 20
+    _attempt=$((_attempt + 1))
+  done
+  echo "wickra-copilot: failed to download ${_url} after 6 attempts"
+  return 1
+}
+
+# Detect the R architecture, not the shell's. On the Windows/arm64 runner
+# `uname -m` reports x86_64 (the shell runs under emulation), so the x64 C ABI
+# would be pulled into an arm64 R and fail to load ("%1 is not a valid Win32
+# application"). R.version$arch reflects the R build that loads the DLL, and it
+# also selects the import library's target machine below.
+arch=$("${R_HOME}/bin/Rscript" -e 'cat(R.version$arch)')
+case "${arch}" in
+  x86_64)
+    triple="x86_64-pc-windows-msvc"
+    dll_machine="i386:x86-64"
+    ;;
+  aarch64 | arm64)
+    triple="aarch64-pc-windows-msvc"
+    dll_machine="arm64"
+    ;;
+  *)
+    echo "wickra-copilot: unsupported Windows arch '${arch}' — set WKCOPILOT_INC/WKCOPILOT_LIB"
+    exit 1
+    ;;
+esac
+
+if [ -n "${WKCOPILOT_INC}" ] && [ -n "${WKCOPILOT_LIB}" ]; then
+  echo "wickra-copilot: using C ABI from WKCOPILOT_INC / WKCOPILOT_LIB (dev override)"
+  inc="${WKCOPILOT_INC}"
+  lib="${WKCOPILOT_LIB}"
+else
+  version=$(sed -n 's/^Version:[[:space:]]*//p' DESCRIPTION)
+  url="https://github.com/wickra-lib/wickra-copilot/releases/download/v${version}/wickra-copilot-c-${triple}.tar.gz"
+  echo "wickra-copilot: downloading C ABI ${triple} for v${version}"
+  wickra_copilot_download "${url}" "src/wickra-copilot-c.tar.gz" || exit 1
+  "${R_HOME}/bin/Rscript" -e "untar('src/wickra-copilot-c.tar.gz', exdir = 'src/wickra-copilot-c')"
+  inc="src/wickra-copilot-c/wickra-copilot-c-${triple}/include"
+  lib="src/wickra-copilot-c/wickra-copilot-c-${triple}/lib"
+fi
+
+cp "${inc}/wickra_copilot.h" src/wickra_copilot.h
+cp "${lib}/wickra_copilot.dll" src/wickra_copilot_abi.dll
+
+# Take the export list from the staged header rather than by dumping the DLL.
+# cbindgen declares exactly the exported symbols, so header and PE export table
+# agree entry for entry, and reading the header needs no binutils at all: the
+# objdump that resolves on Windows/arm64 is the runner image's x86_64 mingw copy,
+# which carries no aarch64 PE backend and rejects an arm64 wickra_copilot_abi.dll with
+# "file format not recognized".
+{
+  echo 'LIBRARY wickra_copilot_abi.dll'
+  echo 'EXPORTS'
+  awk '
+    # Strip block and line comments first so a symbol mentioned in the generated
+    # documentation is never mistaken for a declaration.
+    BEGIN { inblock = 0 }
+    {
+      out = ""
+      i = 1
+      n = length($0)
+      while (i <= n) {
+        two = substr($0, i, 2)
+        if (inblock) {
+          if (two == "*/") { inblock = 0; i += 2 } else { i++ }
+        } else if (two == "/*") {
+          inblock = 1
+          i += 2
+        } else if (two == "//") {
+          break
+        } else {
+          out = out substr($0, i, 1)
+          i++
+        }
+      }
+      print out
+    }
+  ' src/wickra_copilot.h \
+    | grep -oE '\bwickra_copilot_[A-Za-z0-9_]*[[:space:]]*\(' \
+    | sed 's/[[:space:]]*($//' \
+    | LC_ALL=C sort -u
+} > src/wickra_copilot_abi.def
+
+# The import library has to target R's architecture. A binutils build only
+# carries the PE backends it was configured with, so the x86_64 mingw dlltool
+# that resolves on PATH cannot emit an arm64 library — asked for one via -m it
+# fails outright ("invalid bfd target") instead of quietly producing the wrong
+# thing. That loud failure is what makes trying candidates in order safe: the
+# first that succeeds is by construction one that can target this architecture.
+# BINPREF is R's own pointer at the matching Rtools toolchain, and llvm-dlltool
+# (shipped with the clang-based aarch64 Rtools) carries every backend.
+BINPREF=$("${R_HOME}/bin/R" CMD config BINPREF 2>/dev/null | tr -d '\r') || BINPREF=""
+dlltool_log="src/dlltool.log"
+: > "${dlltool_log}"
+DLLTOOL=""
+for cand in "${WICKRA_DLLTOOL}" "${BINPREF}llvm-dlltool" "${BINPREF}dlltool" llvm-dlltool dlltool; do
+  [ -n "${cand}" ] || continue
+  echo "wickra-copilot: trying ${cand} -m ${dll_machine}" >> "${dlltool_log}"
+  if "${cand}" -m "${dll_machine}" --input-def src/wickra_copilot_abi.def \
+      --dllname wickra_copilot_abi.dll --output-lib src/libwickra_copilot_abi.dll.a >> "${dlltool_log}" 2>&1; then
+    DLLTOOL="${cand}"
+    break
+  fi
+done
+if [ -z "${DLLTOOL}" ]; then
+  echo "wickra-copilot: no dlltool could build a ${dll_machine} import library; attempts:"
+  cat "${dlltool_log}"
+  exit 1
+fi
+rm -f "${dlltool_log}"
+echo "wickra-copilot: import library built by ${DLLTOOL} (-m ${dll_machine})"
+exit 0

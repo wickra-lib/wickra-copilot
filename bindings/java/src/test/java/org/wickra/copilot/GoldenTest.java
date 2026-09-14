@@ -1,7 +1,7 @@
 package org.wickra.copilot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,7 +30,7 @@ class GoldenTest {
     @Test
     void goldenContextsAreByteIdentical() throws IOException {
         Path golden = findGolden();
-        assumeTrue(golden != null, "golden fixtures not present");
+        assertNotNull(golden, "golden corpus not found");
 
         String feeds = Files.readString(golden.resolve("feeds.json")).strip();
         String build = "{\"cmd\":\"build_context\",\"feeds\":" + feeds + "}";
