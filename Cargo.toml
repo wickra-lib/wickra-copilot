@@ -38,21 +38,18 @@ keywords = ["trading", "llm", "copilot", "microstructure", "finance"]
 categories = ["finance", "command-line-utilities"]
 
 [workspace.dependencies]
-# Wickra ecosystem. wickra-core and wickra-data ship on crates.io. wickra-exchange
-# supplies the microstructure feeds (order book, trades, funding, open interest,
-# liquidations) whose serialized snapshots are the copilot's context inputs; it is
-# consumed from git until its first crates.io release (its tag is USER-GO gated),
-# with a `version` pinned alongside `git` so the dependency is not a wildcard
-# (cargo-deny's `bans.wildcards = deny`).
-wickra-core = "0.9"
-wickra-data = "0.9"
-wickra-exchange = { git = "https://github.com/wickra-lib/wickra-exchange", version = "0.1" }
-# The only name -> indicator registry in the ecosystem: the backtester's factory
-# resolves any of the 514 indicators by name + params, used to ground fact
-# derivations (volatility, OI deltas) on real indicators. Consumed from git until
-# its first crates.io release; a `version` is pinned alongside `git` so it is not
-# a wildcard (cargo-deny bans.wildcards).
-wickra-backtest-core = { git = "https://github.com/wickra-lib/wickra-backtest", version = "0.1" }
+# Wickra ecosystem, every piece from crates.io. wickra-exchange supplies the
+# microstructure feeds (order book, trades, funding, open interest, liquidations)
+# whose serialized snapshots are the copilot's context inputs, and the
+# backtester's factory is the only name -> indicator registry in the ecosystem,
+# used to ground fact derivations (volatility, OI deltas) on real indicators.
+# Both are pinned exactly, as the released siblings pin them: a newer patch on
+# one side must not leave two copies of the engine in one graph. wickra-core and
+# wickra-data follow their released 1.0 line.
+wickra-core = "1.0"
+wickra-data = "1.0"
+wickra-exchange = "=0.1.4"
+wickra-backtest-core = "=0.1.5"
 # Workspace-internal crate, referenced by the LLM adapter, CLI, bench and bindings.
 wickra-copilot-core = { version = "0.1.0", path = "crates/copilot-core" }
 # The non-deterministic LLM adapter. Consumed by the CLI and desktop reference
@@ -75,7 +72,11 @@ reqwest = { version = "0.12", default-features = false, features = ["blocking", 
 # C ABI header generation.
 cbindgen = "0.27"
 # Test/dev.
-criterion = "0.8"
+# codspeed-criterion-compat is a drop-in for criterion: the benches keep their
+# criterion API and run as criterion locally, but under `cargo codspeed` they
+# report measurements instead of merely executing. Without the alias the
+# CodSpeed job runs the benchmarks and uploads nothing, which reads as a pass.
+criterion = { package = "codspeed-criterion-compat", version = "5.0.1" }
 proptest = "1"
 
 [workspace.lints.rust]

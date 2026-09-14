@@ -12,13 +12,12 @@ outbound HTTPS request to a user-configured endpoint. See
 
 ## Supported versions
 
-This project is pre-release. Security fixes target the `main` branch and the most
-recent published version once a release exists.
+Security fixes land on `main` and ship in the next release. `0.1.0` is the
+first published release; no earlier version exists to support.
 
 | Version | Supported |
 |---------|-----------|
-| `main`  | ✅        |
-| `0.1.x` (upcoming) | ✅ |
+| 0.1.0 (latest) | ✅ |
 
 ## API key handling
 

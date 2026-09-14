@@ -60,14 +60,22 @@ Node.js, WASM, C, C++, C#, Go, Java and R**, with a reference CLI.
   key over their endpoints. No vendor lock-in.
 - **Read-only** — it reads market data and asks questions; it never places orders.
 
+```bash
+# Build the market context from a spec + a per-symbol feed directory,
+# and print its derived facts (the same bytes every binding returns):
+cargo run -p wickra-copilot -- context --spec golden/specs/dump.json --feeds golden/feeds --format json
+
+# Human-readable list of facts:
+cargo run -p wickra-copilot -- context --spec golden/specs/dump.json --feeds golden/feeds
+```
+
 ## Status
 
-**Pre-release — functionally complete, CI-verified, not yet published.** The
-deterministic core, the separate LLM adapter, the CLI, all ten language bindings,
-the byte-exact golden corpus, property + fuzz tests, benchmarks and one runnable
-example per language are in place and green across the full CI matrix (10
-languages × 3 OS). Not yet released to any registry — track progress in
-[ROADMAP.md](ROADMAP.md).
+Early development (0.1.0). The deterministic core, the separate LLM adapter,
+the CLI, all ten language bindings, the byte-exact golden corpus, property +
+fuzz tests, benchmarks and one runnable example per language are in place and
+green across the full CI matrix (10 languages × 3 OS); 0.1.0 is the first
+published release. What comes next is in [ROADMAP.md](ROADMAP.md).
 
 ## Documentation
 
@@ -181,7 +189,7 @@ fuzz/                  cargo-fuzz targets (spec_parse, feed_parse, build_context
 examples/              one runnable "build a context" example per language, plus examples/ask (LLM demo)
 ```
 
-## Building from source
+## Building everything from source
 
 ```bash
 cargo build --workspace
@@ -191,13 +199,50 @@ cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo run -p wickra-copilot -- context --spec golden/specs/dump.json --feeds golden/feeds --format json
 ```
 
+Each binding builds from its own directory — see the per-binding READMEs under
+`bindings/`.
+
+## Testing
+
+Run the suites with the commands in
+[Building everything from source](#building-everything-from-source).
+
+- **`wickra-copilot-core`** — unit tests per fact derivation, the context
+  fold, the parallel-versus-sequential parity, property tests over the feed
+  universe and the command envelope, and the operating-mode check (`facts` is
+  an alias of `build_context`; `query` answers the same against a stored and
+  an inline context). The golden fixtures in `golden/` are the anchor: the
+  same `(spec, feeds)` pair must build the same context bytes here as in every
+  binding.
+- **`wickra-copilot-llm`** — offline only: the rendered prompt bytes and the
+  API-key redaction. The model's answer is never part of any test.
+- **Every binding** asserts the *same* golden bytes and the same operating-mode
+  equivalence. That is the whole cross-language claim, so it is checked the
+  same way in each one rather than approximated per language: Python with
+  pytest (and a plain runner on 3.9), Node with `node --test`, WASM through
+  the nodejs build, C and C++ through `ctest`, C# with `dotnet test`, Go with
+  `go test`, Java with JUnit, and R with the shipped `tests/smoke.R` plus the
+  repository's `run_tests.R`.
+- **Examples** — every example under `examples/` runs in CI and is held to the
+  version and the facts it prints; `examples/ask` compiles in CI and runs only
+  locally, since it talks to a model.
+- **Fuzz** — `fuzz/` holds libFuzzer targets over spec parsing, feed parsing,
+  the command envelope and the query; CI runs each for a short smoke.
+
 ## Requirements
 
-- **Rust** ≥ 1.86 (workspace MSRV; the Node binding needs ≥ 1.88).
-- Binding toolchains as needed: Node ≥ 22, Python ≥ 3.9, a C toolchain, .NET 8,
-  JDK 22+, Go 1.23, R — see each `bindings/<lang>/README.md`.
+- **Rust 1.86+** — the workspace MSRV; the Node binding needs **Rust 1.88**.
+- **Python 3.9+** — the Python binding.
+- **Node 22+** — the Node binding.
+- **Go 1.23+** — the Go binding.
+- **Java 22+** — the Java binding.
+- **R 4.1+** — the R package.
+- **.NET 8+** — the C# binding.
+- A **C11 / C++17** compiler with CMake 3.15+ for the C and C++ examples.
 - The LLM `ask` path additionally needs a reachable provider: a local Ollama
   server, or an API key for OpenAI / Claude / Gemini.
+
+See each `bindings/<lang>/README.md` for the per-language build and install.
 
 ## Benchmarks
 
