@@ -9,6 +9,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A mutating command through the C ABI executed twice.** `wickra_copilot_command`
+  ran the command on every call, and every consumer of the length-then-fill
+  protocol -- Go, C#, Java, R and the C examples -- calls it twice (once for the
+  length, once for the bytes), so `set_spec`, `build_context` and `reset` ran
+  twice through four of the ten bindings. The handle now caches the response it
+  has computed but not yet delivered and reuses it for a repeated call with the
+  same command bytes, so a logical command runs exactly once however many
+  buffer-sizing retries it takes (the contract gym already documents). A C ABI
+  test pins it.
+- **Operating-mode equivalence is tested in the core and in every binding.**
+  `facts` is an alias of `build_context`, and `query` must answer the same
+  against the context the handle stored as against a context passed inline;
+  `operating_modes.rs` pins it in Rust over the golden corpus and each of the
+  nine bindings checks it at its own boundary. The C suite
+  (`examples/c/golden_test.c`, wired into ctest with a CMake-globbed spec list)
+  checks golden parity and both modes without a JSON library. The golden tests
+  fail on a missing corpus instead of skipping.
+- **A C++ hull.** `bindings/c/include/wickra_copilot.hpp` -- header-only
+  C++17, owns the handle, runs the length protocol, turns a negative return
+  into an exception -- ships beside the C header and in the release archive;
+  `examples/c/context.cpp` builds against it.
+- **Every dependency comes from crates.io, and the sibling pins are exact.**
+  `wickra-exchange` and `wickra-backtest-core` were git dependencies, which
+  `cargo publish` refuses; they are the registry crates at `=0.1.4` and
+  `=0.1.5`, as the released siblings pin them, and `wickra-core` and
+  `wickra-data` follow their 1.0 lines. `deny.toml` no longer allows git
+  sources.
+- **The release front in the family shape.** The tag guard, the version gate,
+  idempotent publishing of all three crates (`wickra-copilot-core`,
+  `wickra-copilot-llm`, `wickra-copilot`) with CycloneDX SBOMs, the C ABI
+  archives with the header and the hull, a Maven Central deploy that skips a
+  version already on Central and waits as long as Central takes, the jar
+  uploaded for the provenance job to attest, provenance over the nupkg, jar and
+  C ABI archives, the Go mirror that builds before it pushes, and a
+  `workflow_dispatch` that publishes nothing. The pom carries the release
+  profile (sources, javadoc, GPG, the publishing plugin), `<scm>` and
+  `<developers>` Central requires.
+- **The Python 3.9 CI row runs without pytest.** pytest 9.x requires 3.10, so
+  that row could only pin 8.4.2, below the fix for GHSA-6w46-j5rx-g56g with no
+  backport. The 3.9 lock carries maturin only, and the row runs the same test
+  modules through `bindings/python/tests/run_without_pytest.py`; 3.10 and up
+  run them under pytest as before.
+- **The R package builds the family way.** `configure` downloads the C ABI
+  release archive (or builds it from the tag's source on r-universe's
+  WebAssembly image), `configure.win` picks the architecture from
+  `R.version$arch`, the exported functions carry generated `man/` pages, a
+  shipped smoke test runs inside the tarball, `.Rbuildignore` is regex-safe,
+  and `DESCRIPTION` states the R floor.
+- CI in the family shape: the binding-surface, links and semver jobs, the
+  wheel container smoke, an Examples job that holds every example to the
+  version line, a WASM demo page (`examples/wasm/context.html`) whose module
+  is parse-checked, CodeQL over C#, Java and C/C++ with a config that keeps
+  generated code out, osv-scanner, timeouts on every job, patch-level pins,
+  Dependabot over every manifest (the fuzz crate and the Go and Node examples
+  included), the five repository-check scripts, `update-lockfiles.sh`, the
+  detailed issue and PR templates, actionlint, CodSpeed with `criterion`
+  aliased to it, zizmor's `self-repository` policy, and docs.rs metadata on
+  all three crates.
+- Licence texts travel with every published package (`LICENSES/`, copies in
+  each crate and the Python and npm packages); the README opens with the
+  quickstart and states the toolchain floors the manifests declare;
+  `SECURITY.md` names the first release.
 - **Two of the three published crates carried names the release could not
   upload.** `copilot-core` and `copilot-llm` are outside the org's crates.io
   token scope, which creates new crates under the `wickra-` prefix only;
