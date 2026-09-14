@@ -29,6 +29,7 @@ node_modules/
 
 # WASM build artifacts
 bindings/wasm/pkg/
+bindings/wasm/pkg-node/
 
 # Go: the C ABI library is staged per-platform by CI, never committed here.
 bindings/go/lib/*/
@@ -52,3 +53,10 @@ bindings/r/..Rcheck/
 .env.*
 *.key
 secrets/
+# Staged into src/ by configure at build time; never committed.
+bindings/r/src/wickra_copilot.h
+bindings/r/src/libwickra_copilot*
+bindings/r/src/wickra_copilot_abi.def
+bindings/r/src/wickra-copilot-c*
+bindings/r/src/Makevars
+bindings/r/src/symbols.rds

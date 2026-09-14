@@ -15,4 +15,5 @@ Encoding: UTF-8
 NeedsCompilation: yes
 SystemRequirements: the wickra-copilot C ABI shared library (WKCOPILOT_LIB) and
     its header (WKCOPILOT_INC).
-RoxygenNote: 7.3.2
+Depends: R (>= 4.1)
+Config/roxygen2/version: 8.0.0
