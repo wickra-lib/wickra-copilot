@@ -17,6 +17,7 @@ cross-language golden fixtures live in [`../golden/`](../golden)).
 | C# | [`csharp/Context/`](csharp/Context/) | `dotnet run --project examples/csharp/Context` |
 | Java | [`java/Context.java`](java/Context.java) | see the header comment |
 | R | [`r/context.R`](r/context.R) | `Rscript examples/r/context.R` |
+| WASM | [`wasm/`](wasm/) | `wasm-pack build bindings/wasm --target web`, serve the repository root, open `examples/wasm/context.html` |
 
 The native bindings (Python, Node.js) load their own compiled library. The bindings
 that go through the C ABI (Go, C#, Java, R, and the C / C++ example itself) need the
@@ -28,7 +29,11 @@ cargo build --release -p wickra-copilot-c
 
 ## C / C++
 
-The C and C++ examples build with CMake and run under ctest:
+The C example calls the four ABI functions directly; the C++ example goes
+through `bindings/c/include/wickra_copilot.hpp`, the header-only hull that owns
+the handle and runs the length-out protocol. `golden_test.c` asserts golden
+parity and operating-mode equivalence over the whole corpus. All three build
+with CMake and run under ctest:
 
 ```bash
 cargo build --release -p wickra-copilot-c

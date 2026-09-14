@@ -17,10 +17,20 @@
 //!    written into `out`.
 //!
 //! Whenever `len < cap` the response is written immediately, so a
-//! sufficiently-large buffer needs only one call. Negative returns are reserved
-//! for unusable arguments ([`WICKRA_COPILOT_ERR_NULL`],
-//! [`WICKRA_COPILOT_ERR_UTF8`]) and caught panics ([`WICKRA_COPILOT_ERR_PANIC`]);
-//! a non-negative return is always the response length. Domain errors (a bad
+//! sufficiently-large buffer needs only one call.
+//!
+//! **Mutating commands and the response cache.** `set_spec`, `build_context`
+//! and `reset` change the handle's state, so the two-call idiom must not
+//! execute them twice. Each handle therefore caches the response of the command
+//! it last *computed but not yet delivered* (`pending`). A repeated call with
+//! the same command bytes reuses that cached response instead of re-executing;
+//! once the response is successfully written to a buffer, the cache is cleared
+//! so the next identical command executes freshly. A logical command is thus
+//! executed exactly once, no matter how many buffer-sizing retries it takes.
+//!
+//! Negative returns are reserved for unusable arguments
+//! ([`WICKRA_COPILOT_ERR_NULL`], [`WICKRA_COPILOT_ERR_UTF8`]) and caught panics
+//! ([`WICKRA_COPILOT_ERR_PANIC`]); a non-negative return is always the response length. Domain errors (a bad
 //! spec, an unknown command) are *not* negative — they come back in-band as
 //! `{"ok":false,"error":...}` JSON in the buffer.
 
@@ -39,7 +49,12 @@ pub const WICKRA_COPILOT_ERR_PANIC: i32 = -3;
 
 /// An opaque handle to a copilot instance. Created by [`wickra_copilot_new`] and
 /// destroyed by [`wickra_copilot_free`]; never dereferenced by the caller.
-pub struct WickraCopilot(Copilot);
+pub struct WickraCopilot {
+    inner: Copilot,
+    /// The last command computed but not yet delivered: `(cmd_bytes, response)`.
+    /// See the module docs for the mutating-command cache contract.
+    pending: Option<(Vec<u8>, String)>,
+}
 
 /// Read a NUL-terminated C string as `&str`, or `None` on null / bad UTF-8.
 ///
@@ -66,7 +81,10 @@ pub unsafe extern "C" fn wickra_copilot_new(spec_json: *const c_char) -> *mut Wi
         return ptr::null_mut();
     };
     match catch_unwind(AssertUnwindSafe(|| Copilot::new(json))) {
-        Ok(Ok(copilot)) => Box::into_raw(Box::new(WickraCopilot(copilot))),
+        Ok(Ok(inner)) => Box::into_raw(Box::new(WickraCopilot {
+            inner,
+            pending: None,
+        })),
         _ => ptr::null_mut(),
     }
 }
@@ -90,6 +108,7 @@ pub unsafe extern "C" fn wickra_copilot_free(handle: *mut WickraCopilot) {
 /// response and a trailing NUL have been written to `out`; otherwise `out` is
 /// left untouched and the caller should re-call with a `cap` of at least
 /// `len + 1`. Pass `out = NULL`, `cap = 0` to query the length without writing.
+/// A mutating command is executed exactly once across all such retries.
 ///
 /// # Safety
 /// `handle` must be a valid handle; `cmd_json` a valid NUL-terminated C string;
@@ -107,27 +126,45 @@ pub unsafe extern "C" fn wickra_copilot_command(
     let Some(cmd) = (unsafe { opt_str(cmd_json) }) else {
         return WICKRA_COPILOT_ERR_UTF8;
     };
-    let copilot = unsafe { &mut (*handle).0 };
-    let response = match catch_unwind(AssertUnwindSafe(|| copilot.command_json(cmd))) {
-        // `command_json` folds domain errors into `{"ok":false,...}` JSON, so a
-        // top-level `Err` should not occur; surface it in-band all the same
-        // rather than inventing a new negative code.
-        Ok(result) => result.unwrap_or_else(|err| {
-            format!(
-                "{{\"ok\":false,\"error\":{}}}",
-                json_string(&err.to_string())
-            )
-        }),
-        Err(_) => return WICKRA_COPILOT_ERR_PANIC,
-    };
+    let copilot = unsafe { &mut *handle };
 
-    let bytes = response.as_bytes();
-    let len = bytes.len();
-    if len < cap && !out.is_null() {
-        unsafe {
-            ptr::copy_nonoverlapping(bytes.as_ptr(), out.cast::<u8>(), len);
-            *out.add(len) = 0;
+    // Reuse the cached response for an identical, not-yet-delivered command;
+    // otherwise execute once and cache the result.
+    let is_retry =
+        matches!(&copilot.pending, Some((bytes, _)) if bytes.as_slice() == cmd.as_bytes());
+    if !is_retry {
+        let response = match catch_unwind(AssertUnwindSafe(|| copilot.inner.command_json(cmd))) {
+            // `command_json` folds domain errors into `{"ok":false,...}` JSON, so
+            // a top-level `Err` should not occur; surface it in-band all the same
+            // rather than inventing a new negative code.
+            Ok(result) => result.unwrap_or_else(|err| {
+                format!(
+                    "{{\"ok\":false,\"error\":{}}}",
+                    json_string(&err.to_string())
+                )
+            }),
+            Err(_) => return WICKRA_COPILOT_ERR_PANIC,
+        };
+        copilot.pending = Some((cmd.as_bytes().to_vec(), response));
+    }
+
+    let (len, delivered) = {
+        let response = &copilot.pending.as_ref().expect("pending set above").1;
+        let bytes = response.as_bytes();
+        let len = bytes.len();
+        let delivered = len < cap && !out.is_null();
+        if delivered {
+            unsafe {
+                ptr::copy_nonoverlapping(bytes.as_ptr(), out.cast::<u8>(), len);
+                *out.add(len) = 0;
+            }
         }
+        (len, delivered)
+    };
+    // The response has been delivered: clear the cache so the next identical
+    // command executes freshly.
+    if delivered {
+        copilot.pending = None;
     }
     i32::try_from(len).unwrap_or(i32::MAX)
 }
@@ -173,6 +210,55 @@ mod tests {
     fn read_buf(buf: &[u8]) -> String {
         let cstr = CStr::from_bytes_until_nul(buf).unwrap();
         cstr.to_str().unwrap().to_string()
+    }
+
+    /// The response cache: buffer-sizing retries of a mutating command
+    /// execute it once. Two length-only calls and one delivering call of the
+    /// same `build_context` are one execution, the delivered bytes are the
+    /// ones the length described, and once delivered the cache is clear -- a
+    /// following `query` against the built context answers.
+    #[test]
+    fn buffer_retry_executes_a_mutating_command_once() {
+        let spec = CString::new(SPEC).unwrap();
+        let handle = unsafe { wickra_copilot_new(spec.as_ptr()) };
+        assert!(!handle.is_null());
+        let build = CString::new(
+            r#"{"cmd":"build_context","feeds":{"BTCUSDT":{"symbol":"BTCUSDT","candles":[
+                {"ts":1,"open":100.0,"high":100.0,"low":100.0,"close":100.0,"volume":1.0},
+                {"ts":2,"open":97.0,"high":97.0,"low":97.0,"close":97.0,"volume":1.0},
+                {"ts":3,"open":94.0,"high":94.0,"low":94.0,"close":94.0,"volume":1.0}]}}}"#,
+        )
+        .unwrap();
+        let a = unsafe { wickra_copilot_command(handle, build.as_ptr(), ptr::null_mut(), 0) };
+        let b = unsafe { wickra_copilot_command(handle, build.as_ptr(), ptr::null_mut(), 0) };
+        assert!(a > 0);
+        assert_eq!(a, b);
+        let mut buf = vec![0u8; usize::try_from(a).unwrap() + 1];
+        let c = unsafe {
+            wickra_copilot_command(
+                handle,
+                build.as_ptr(),
+                buf.as_mut_ptr().cast::<c_char>(),
+                buf.len(),
+            )
+        };
+        assert_eq!(c, a);
+        let context = read_buf(&buf);
+        assert!(context.contains("BTCUSDT"));
+
+        let query = CString::new(r#"{"cmd":"query","question":"what moved?"}"#).unwrap();
+        let mut out = vec![0u8; 8192];
+        let n = unsafe {
+            wickra_copilot_command(
+                handle,
+                query.as_ptr(),
+                out.as_mut_ptr().cast::<c_char>(),
+                out.len(),
+            )
+        };
+        assert!(n > 0);
+        assert!(read_buf(&out).contains("\"tool_calls\""));
+        unsafe { wickra_copilot_free(handle) };
     }
 
     #[test]
