@@ -964,7 +964,7 @@ jobs:
           set -euo pipefail
           cd wickra-copilot-go-module
           cat > smoke_main_test.go <<'GO'
-          package wickra
+          package copilot
 
           import (
             "strings"
@@ -975,7 +975,11 @@ jobs:
             if Version() == "" {
               t.Fatal("Version() returned an empty string")
             }
-            h := New()
+            // The smallest spec the core accepts; the constructor parses it.
+            h, err := New(`{"symbols":["BTCUSDT"],"lookback":3,"facts":["price_move"]}`)
+            if err != nil {
+              t.Fatalf("New: %v", err)
+            }
             defer h.Close()
             out, err := h.Command(`{"cmd":"version"}`)
             if err != nil {
