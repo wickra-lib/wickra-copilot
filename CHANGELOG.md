@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.0] - 2026-09-14
 
+### Security
+
+- **rustls 0.23.45.** RUSTSEC-2026-0285: rustls accepted TLS 1.3 handshake
+  messages sent at the wrong encryption level. The lock moves to the
+  patched release; nothing in the code changes.
+
 ### Fixed
 
 - **A mutating command through the C ABI executed twice.** `wickra_copilot_command`
