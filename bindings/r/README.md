@@ -31,26 +31,6 @@ install.packages("wickracopilot", repos = "https://wickra-lib.r-universe.dev")
 
 A C toolchain (Rtools on Windows) is required for the thin `.Call` glue layer.
 
-### Requirements
-
-The package compiles against the `wickra-copilot` C ABI. Point the build at the
-header and library with two environment variables (set by CI / the installer):
-
-- `WKCOPILOT_INC` — the directory holding `wickra_copilot.h` (i.e. `bindings/c/include`).
-- `WKCOPILOT_LIB` — the directory holding the built shared library (i.e. the
-  Cargo `target/release` after `cargo build -p wickra-copilot-c --release`).
-
-At run time the loader finds the shared library via `PATH` (Windows) or
-`LD_LIBRARY_PATH` / `DYLD_LIBRARY_PATH` (Linux/macOS).
-
-### Building from this repository (contributors)
-
-```sh
-cargo build -p wickra-copilot-c --release
-WKCOPILOT_INC=../c/include WKCOPILOT_LIB=../../target/release R CMD INSTALL .
-Rscript tests/run_tests.R
-```
-
 ## Quick start
 
 ```r
