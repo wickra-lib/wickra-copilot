@@ -23,13 +23,37 @@ reachable over the C ABI, so the network and API key stay off this surface.
 
 ## Install
 
-From r-universe, which builds the package with the prebuilt C ABI library bundled:
+From r-universe:
 
 ```r
 install.packages("wickracopilot", repos = "https://wickra-lib.r-universe.dev")
 ```
 
-A C toolchain (Rtools on Windows) is required for the thin `.Call` glue layer.
+The package's `configure` downloads the prebuilt C ABI library for this exact
+version from the GitHub release and bundles it, so an ordinary install needs
+nothing but a C toolchain (Rtools on Windows) for the thin `.Call` glue layer. To
+build against a local checkout instead, point it at the header and library with
+the environment variables below.
+
+### Requirements
+
+The package compiles against the `wickra-copilot` C ABI. Point the build at the
+header and library with two environment variables (set by CI / the installer):
+
+- `WKCOPILOT_INC` — the directory holding `wickra_copilot.h` (i.e. `bindings/c/include`).
+- `WKCOPILOT_LIB` — the directory holding the built shared library (i.e. the
+  Cargo `target/release` after `cargo build -p wickra-copilot-c --release`).
+
+At run time the loader finds the shared library via `PATH` (Windows) or
+`LD_LIBRARY_PATH` / `DYLD_LIBRARY_PATH` (Linux/macOS).
+
+### Building from this repository (contributors)
+
+```sh
+cargo build -p wickra-copilot-c --release
+WKCOPILOT_INC=../c/include WKCOPILOT_LIB=../../target/release R CMD INSTALL .
+Rscript tests/run_tests.R
+```
 
 ## Quick start
 
