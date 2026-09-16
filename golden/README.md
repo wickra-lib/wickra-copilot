@@ -14,7 +14,7 @@ Python, Node.js, WASM, C, C++, C#, Go, Java and R.
 > deliberately **not** part of any golden. The `wickra-copilot-llm` tests only pin the
 > rendered prompt bytes and the API-key redaction, offline.
 
-## Files
+## Layout
 
 - **`generate_feeds.py`** — the deterministic feed generator. Every value is a
   fixed function of the bar index (no randomness), so the feeds reproduce
@@ -59,7 +59,7 @@ a funding series, two open-interest points and a liquidation pair:
   mathematically capped below the significance threshold and the fact never
   fires. The golden reflects the real (empty) output rather than a doctored one.
 
-## Regenerating the blessed output
+## Blessing
 
 The expected files are `serde_json::to_string(&MarketContext)` — the same string
 `command_json`'s `build_context` returns and the CLI's `--format json` prints.
