@@ -69,11 +69,11 @@ cargo run -p wickra-copilot -- context --spec golden/specs/dump.json --feeds gol
 
 ## Status
 
-Early development (0.1.0). The deterministic core, the separate LLM adapter,
-the CLI, all ten language bindings, the byte-exact golden corpus, property +
-fuzz tests, benchmarks and one runnable example per language are in place and
-green across the full CI matrix (10 languages × 3 OS); 0.1.0 is the first
-published release. What comes next is in [ROADMAP.md](ROADMAP.md).
+**0.1.0 — the current release.** The deterministic core, the separate LLM
+adapter, the CLI, all ten language bindings, the byte-exact golden corpus,
+property + fuzz tests, benchmarks and one runnable example per language are in
+place and green across the full CI matrix (10 languages × 3 OS); What comes next
+is in [ROADMAP.md](ROADMAP.md).
 
 ## Documentation
 
