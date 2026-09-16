@@ -48,8 +48,8 @@ categories = ["finance", "command-line-utilities"]
 # wickra-data follow their released 1.0 line.
 wickra-core = "1.0"
 wickra-data = "1.0"
-wickra-exchange = "=0.1.4"
-wickra-backtest-core = "=0.1.5"
+wickra-exchange = "=0.1.5"
+wickra-backtest-core = "=0.1.6"
 # Workspace-internal crate, referenced by the LLM adapter, CLI, bench and bindings.
 wickra-copilot-core = { version = "0.1.0", path = "crates/copilot-core" }
 # The non-deterministic LLM adapter. Consumed by the CLI and desktop reference
