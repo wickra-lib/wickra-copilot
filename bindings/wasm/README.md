@@ -43,7 +43,7 @@ This emits `pkg/` with the `.wasm` module and JS glue.
 ## Quick start
 
 ```js
-import init, { Copilot, version } from "./pkg/wickra_copilot_wasm.js";
+import init, { Copilot, version } from "wickra-copilot-wasm";
 
 await init();
 
