@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://wickra.org"><img src="https://raw.githubusercontent.com/wickra-lib/.github/main/profile/wickra-banner.webp?v=514" alt="Wickra Copilot — a local market copilot grounded in real order book, liquidation and funding microstructure" width="100%"></a>
+  <a href="https://wickra.org"><img src="https://raw.githubusercontent.com/wickra-lib/.github/main/profile/wickra-banner.webp?v=514-7" alt="Wickra Copilot — a local market copilot grounded in real order book, liquidation and funding microstructure" width="100%"></a>
 </p>
 
 [![Built on Wickra](https://img.shields.io/badge/built%20on-wickra-3b82f6)](https://github.com/wickra-lib/wickra)
@@ -25,13 +25,13 @@
 
 ---
 
-# Wickra Copilot
-
 **A local market copilot: an LLM grounded in real order book, liquidation and funding microstructure — the trading assistant that cannot hallucinate the facts.**
 
-> **▶ Live demo:** all 514 indicators over real Binance market data, computed live in your browser — **[live.wickra.org](https://live.wickra.org)** · zero backend, powered by `wickra-wasm`.
+> **▶ Live demos:** the backtester compiled to WebAssembly, an equity curve building bar by bar — **[backtest-live.wickra.org](https://backtest-live.wickra.org)**;
+> one StrategySpec side by side in Python, Rust, JS and Go — **[playground.wickra.org](https://playground.wickra.org)**;
+> all 514 indicators of the core over a real Binance feed — **[live.wickra.org](https://live.wickra.org)**. Zero backend, all of them.
 
-> **Part of the [Wickra ecosystem](https://github.com/wickra-lib):** the same data-driven core and ten-language binding surface also power [wickra-exchange](https://github.com/wickra-lib/wickra-exchange), [wickra-backtest](https://github.com/wickra-lib/wickra-backtest), [wickra-terminal](https://github.com/wickra-lib/wickra-terminal) and 20 more — see [the full list](https://github.com/wickra-lib).
+**Part of the [Wickra ecosystem](#ecosystem):** the same data-driven core and ten-language binding surface also power [wickra-exchange](https://github.com/wickra-lib/wickra-exchange), [wickra-backtest](https://github.com/wickra-lib/wickra-backtest), [wickra-terminal](https://github.com/wickra-lib/wickra-terminal) and 20 more — see [the full list](https://github.com/wickra-lib).
 
 Wickra Copilot is one data-driven core, [`wickra-copilot-core`](crates/copilot-core): a
 serde `ContextSpec` is folded over real microstructure feeds ([`wickra-core`](https://github.com/wickra-lib/wickra)
@@ -71,11 +71,11 @@ cargo run -p wickra-copilot -- context --spec golden/specs/dump.json --feeds gol
 
 ## Status
 
-Early development (0.1.0). The deterministic core, the separate LLM adapter,
-the CLI, all ten language bindings, the byte-exact golden corpus, property +
-fuzz tests, benchmarks and one runnable example per language are in place and
-green across the full CI matrix (10 languages × 3 OS); 0.1.0 is the first
-published release. What comes next is in [ROADMAP.md](ROADMAP.md).
+**0.1.0 — the current release.** The deterministic core, the separate LLM
+adapter, the CLI, all ten language bindings, the byte-exact golden corpus,
+property + fuzz tests, benchmarks and one runnable example per language are in
+place and green across the full CI matrix (10 languages × 3 OS); What comes next
+is in [ROADMAP.md](ROADMAP.md).
 
 ## Documentation
 
@@ -294,8 +294,20 @@ vulnerabilities privately — never in a public issue.
 
 ## License
 
-Dual-licensed under either [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at
-your option.
+Licensed under either of
+
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or
+  <http://www.apache.org/licenses/LICENSE-2.0>)
+- MIT license ([LICENSE-MIT](LICENSE-MIT) or <http://opensource.org/licenses/MIT>)
+
+at your option. Use it, fork it, modify it, redistribute it — commercially or
+not — file issues, send pull requests; all welcome.
+
+### Contribution
+
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
+dual licensed as above, without any additional terms or conditions.
 
 ## Disclaimer
 
