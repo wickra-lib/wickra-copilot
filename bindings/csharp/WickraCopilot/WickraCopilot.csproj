@@ -10,7 +10,7 @@
     <AssemblyName>Wickra.Copilot</AssemblyName>
 
     <PackageId>Wickra.Copilot</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>kingchenc</Authors>
     <Description>The deterministic market-context core for .NET over the Wickra C ABI: build a Copilot from a spec, drive it with commands, read back a ranked list of hard facts. The LLM adapter is never exposed over the binding.</Description>
     <PackageLicenseExpression>MIT OR Apache-2.0</PackageLicenseExpression>

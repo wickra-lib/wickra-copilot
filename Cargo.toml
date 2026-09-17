@@ -26,7 +26,7 @@ members = ["crates/copilot-core", "crates/copilot-llm", "crates/copilot-cli", "c
 exclude = ["fuzz"]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 rust-version = "1.86"
 license = "MIT OR Apache-2.0"
@@ -51,11 +51,11 @@ wickra-data = "1.0"
 wickra-exchange = "=0.1.5"
 wickra-backtest-core = "=0.1.6"
 # Workspace-internal crate, referenced by the LLM adapter, CLI, bench and bindings.
-wickra-copilot-core = { version = "0.1.0", path = "crates/copilot-core" }
+wickra-copilot-core = { version = "0.1.1", path = "crates/copilot-core" }
 # The non-deterministic LLM adapter. Consumed by the CLI and desktop reference
 # consumers only — never by the C ABI or any language binding, so the network and
 # API key stay isolated from the FFI surface.
-wickra-copilot-llm = { version = "0.1.0", path = "crates/copilot-llm" }
+wickra-copilot-llm = { version = "0.1.1", path = "crates/copilot-llm" }
 # Serialization — the data-driven boundary (spec/command/context as JSON/TOML).
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

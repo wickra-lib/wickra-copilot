@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-17
+
 ### Fixed
 
 - **The Java binding loads the library it ships.** The jar carries the native
@@ -178,5 +180,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`deny.toml`, `osv-scanner.toml`, `lychee.toml`), lint configuration
   (`clippy.toml`), `repo-metadata.toml`, and dual `MIT OR Apache-2.0` licensing.
 
-[Unreleased]: https://github.com/wickra-lib/wickra-copilot/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/wickra-lib/wickra-copilot/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/wickra-lib/wickra-copilot/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/wickra-lib/wickra-copilot/releases/tag/v0.1.0
