@@ -46,6 +46,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **wickra-backtest-core 0.1.6 and wickra-exchange 0.1.5.** Both pins move from
+  `=0.1.5` / `=0.1.4` to the releases the family is on; the lock follows. A
+  cross-repo scan lined the 24 wickra-lib repositories up, and the only other
+  thing this one spelled differently was the example job's `dotnet-version`,
+  which now reads `8.0.x` like the siblings'.
+
+### Changed
+
 - **uv 0.12.15 for the lockfile script.** `scripts/update-lockfiles.sh`
   bootstraps 0.12.15 (was 0.12.13); the pin and all four release
   checksums move together, taken from the release's `.sha256` files.
