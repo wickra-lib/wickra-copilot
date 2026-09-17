@@ -1,6 +1,6 @@
 {
   "name": "wickra-copilot",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The deterministic market-context core: build a Copilot from a spec, drive it with commands, read back a ranked list of hard facts. Node bindings powered by Rust.",
   "author": "kingchenc <support@wickra.org>",
   "main": "index.js",
@@ -47,12 +47,12 @@
     "node": ">= 22"
   },
   "optionalDependencies": {
-    "wickra-copilot-linux-x64-gnu": "0.1.0",
-    "wickra-copilot-linux-arm64-gnu": "0.1.0",
-    "wickra-copilot-darwin-x64": "0.1.0",
-    "wickra-copilot-darwin-arm64": "0.1.0",
-    "wickra-copilot-win32-x64-msvc": "0.1.0",
-    "wickra-copilot-win32-arm64-msvc": "0.1.0"
+    "wickra-copilot-linux-x64-gnu": "0.1.1",
+    "wickra-copilot-linux-arm64-gnu": "0.1.1",
+    "wickra-copilot-darwin-x64": "0.1.1",
+    "wickra-copilot-darwin-arm64": "0.1.1",
+    "wickra-copilot-win32-x64-msvc": "0.1.1",
+    "wickra-copilot-win32-arm64-msvc": "0.1.1"
   },
   "scripts": {
     "build": "napi build --platform --release",

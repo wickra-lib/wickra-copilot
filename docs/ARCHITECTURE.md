@@ -58,7 +58,7 @@ thrown exception. The commands are:
 | `build_context` (alias `facts`) (`{"feeds":…}`) | a `MarketContext` |
 | `query` (`{"question":"…"}`) | `{"tool_calls":[…]}` |
 | `reset` | `{"ok":true}` |
-| `version` | `{"version":"0.1.0"}` |
+| `version` | `{"version":"0.1.1"}` |
 
 Because the reply is the core's compact JSON verbatim, the context is
 byte-identical across every language.
