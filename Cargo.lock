@@ -2655,9 +2655,9 @@ dependencies = [
 
 [[package]]
 name = "wickra-backtest-core"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b528174b3b512b68eea41bfa454267d97f1ef53cde58ed983dbf1ba42ef4e939"
+checksum = "42834428a01fa2de6e52a1bdec23fc85d5ede7193ae95e8e4349a8b2c8796cda"
 dependencies = [
  "schemars",
  "serde",
@@ -2781,9 +2781,9 @@ dependencies = [
 
 [[package]]
 name = "wickra-exchange"
-version = "0.1.5"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b220f0a78613125e1bb22fcf1fe5e436001f4ffc4e6c531073a8dbc5138483e"
+checksum = "c7dcf3533a43331e332f755a377a5e98bf4d8bac459a793150067fdfba008f2c"
 dependencies = [
  "flate2",
  "futures-util",
@@ -2795,9 +2795,9 @@ dependencies = [
 
 [[package]]
 name = "wickra-exchange-core"
-version = "0.1.5"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6e3b9f03c4f79d94ef9d2e8a59b91ddb22685c07933836dcc9fa7b567f2e5971"
+checksum = "63c62c6c64d143f955b0f36225de3d28b33bc364d9c6c20cc06fd097ac5b4c62"
 dependencies = [
  "base64",
  "hex",
