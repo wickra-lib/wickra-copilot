@@ -83,7 +83,7 @@ copilot.command('{"cmd":"reset"}')                                          # {"
 cargo run -p wickra-copilot -- --version
 ```
 
-or, from any binding, `{"cmd":"version"}` → `{"version":"0.1.1"}`.
+or, from any binding, `{"cmd":"version"}` → `{"version":"0.1.2"}`.
 
 ## See also
 

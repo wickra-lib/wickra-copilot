@@ -392,7 +392,7 @@ dependencies = [
 
 [[package]]
 name = "copilot-bench"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "codspeed-criterion-compat",
  "wickra-copilot-core",
@@ -2679,7 +2679,7 @@ dependencies = [
 
 [[package]]
 name = "wickra-copilot"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "clap",
  "serde_json",
@@ -2691,7 +2691,7 @@ dependencies = [
 
 [[package]]
 name = "wickra-copilot-ask-example"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "serde_json",
  "wickra-copilot-core",
@@ -2700,14 +2700,14 @@ dependencies = [
 
 [[package]]
 name = "wickra-copilot-c"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "wickra-copilot-core",
 ]
 
 [[package]]
 name = "wickra-copilot-core"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "proptest",
  "rayon",
@@ -2724,7 +2724,7 @@ dependencies = [
 
 [[package]]
 name = "wickra-copilot-example"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "serde_json",
  "wickra-copilot-core",
@@ -2732,7 +2732,7 @@ dependencies = [
 
 [[package]]
 name = "wickra-copilot-llm"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "reqwest",
  "serde",
@@ -2743,7 +2743,7 @@ dependencies = [
 
 [[package]]
 name = "wickra-copilot-node"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "napi",
  "napi-build",
@@ -2753,7 +2753,7 @@ dependencies = [
 
 [[package]]
 name = "wickra-copilot-python"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "pyo3",
  "wickra-copilot-core",
@@ -2761,7 +2761,7 @@ dependencies = [
 
 [[package]]
 name = "wickra-copilot-wasm"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "wasm-bindgen",
  "wickra-copilot-core",

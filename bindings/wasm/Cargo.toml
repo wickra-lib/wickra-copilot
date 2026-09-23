@@ -29,5 +29,5 @@ workspace = true
 # cleanly to wasm32. Declared as a direct path dep, not `workspace = true`,
 # because cargo silently ignores `default-features = false` on an inherited
 # workspace dependency.
-wickra-copilot-core = { path = "../../crates/copilot-core", version = "0.1.1", default-features = false }
+wickra-copilot-core = { path = "../../crates/copilot-core", version = "0.1.2", default-features = false }
 wasm-bindgen = "0.2"
