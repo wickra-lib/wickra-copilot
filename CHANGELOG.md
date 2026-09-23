@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-09-23
+
+A maintenance release: the assistant and its bindings are unchanged. It
+publishes the refreshed dependency tree and toolchain pins.
+
+### Added
+
+- **The Node binding reports which artifact it loaded.** The loader generated
+  by `@napi-rs/cli` 3.10.4 exports `__napiBindingTarget` -- `'native'` for the
+  native addon, otherwise the WASI flavor it resolved -- and follows a
+  `NAPI_RS_NATIVE_LIBRARY_PATH` override to a WASI loader instead of
+  misreporting it as native. Typed in `index.d.ts`.
+
+### Changed
+
+- **Built on wickra-core 1.0.6.** The lock takes the indicator core's latest
+  release; the `1.0` requirement already admitted it.
+- **The family pins follow the owners' releases.** `wickra-backtest-core` =0.1.7
+  -> =0.1.8, `wickra-exchange` =0.1.6 -> =0.1.7 -- the exact pins this
+  repository keeps on its siblings move to the versions those repositories
+  release in the same train, and every tracked lockfile follows.
+- **Third-party dependencies refreshed.** `Cargo.lock` takes 40 crates to their
+  newest versions compatible with the Rust floor (this repository resolves
+  MSRV-aware), run across the family in one pass so every repository resolves
+  the same day's versions. The refresh itself changes no manifest.
+- **`@napi-rs/cli` 3.10.4** for the Node binding, the family's line.
+- **uv 0.12.18** for the lockfile bootstrap in `scripts/update-lockfiles.sh`,
+  with all four platform checksums moved together.
+- **The README's static badges are served by the organization** rather than
+  hot-linked from shields.io, so they no longer break when shields is down.
+
 ## [0.1.1] - 2026-09-17
 
 ### Fixed
@@ -181,6 +212,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`deny.toml`, `osv-scanner.toml`, `lychee.toml`), lint configuration
   (`clippy.toml`), `repo-metadata.toml`, and dual `MIT OR Apache-2.0` licensing.
 
-[Unreleased]: https://github.com/wickra-lib/wickra-copilot/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/wickra-lib/wickra-copilot/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/wickra-lib/wickra-copilot/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/wickra-lib/wickra-copilot/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/wickra-lib/wickra-copilot/releases/tag/v0.1.0
