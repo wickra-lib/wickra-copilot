@@ -25,8 +25,9 @@ publishes the refreshed dependency tree and toolchain pins.
 - **Built on wickra-core 1.0.5.** The lock takes the indicator core's latest
   release; the `1.0` requirement already admitted it.
 - **Third-party dependencies refreshed.** `Cargo.lock` takes 27 crates to their
-  newest semver-compatible versions, run across the family in one pass so every
-  repository resolves the same day's versions. No manifest changed.
+  newest versions compatible with the Rust floor (this repository resolves
+  MSRV-aware), run across the family in one pass so every repository resolves
+  the same day's versions. No manifest changed.
 - **`@napi-rs/cli` 3.10.4** for the Node binding, the family's line.
 - **uv 0.12.18** for the lockfile bootstrap in `scripts/update-lockfiles.sh`,
   with all four platform checksums moved together.
