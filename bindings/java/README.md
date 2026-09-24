@@ -37,14 +37,14 @@ Maven:
 <dependency>
   <groupId>org.wickra</groupId>
   <artifactId>wickra-copilot</artifactId>
-  <version>0.1.2</version>
+  <version>0.1.3</version>
 </dependency>
 ```
 
 Gradle:
 
 ```kotlin
-implementation("org.wickra:wickra-copilot:0.1.2")
+implementation("org.wickra:wickra-copilot:0.1.3")
 ```
 
 The native library ships prebuilt per platform inside the jar and is

@@ -1,6 +1,6 @@
 {
   "name": "wickra-copilot-win32-arm64-msvc",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Native binding for wickra-copilot (Windows arm64 MSVC). Installed automatically as an optional dependency of wickra-copilot on matching platforms.",
   "main": "wickra-copilot.win32-arm64-msvc.node",
   "files": [
