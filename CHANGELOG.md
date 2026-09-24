@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-09-24
+
+A follow-up release: the assistant and its bindings are unchanged. It pins
+wickra-exchange 0.1.8, the release that makes exchange's R package build on
+r-universe's WebAssembly target and its release pipeline re-runnable.
+
+### Changed
+
+- **Built on wickra-exchange 0.1.8.** The exact pin on `wickra-exchange` moves
+  from =0.1.7 to =0.1.8, and every tracked lockfile follows. Nothing in
+  exchange's Rust API changed between the two; 0.1.8 fixes its R package's
+  WebAssembly build and its Maven Central step.
+
 ## [0.1.2] - 2026-09-23
 
 A maintenance release: the assistant and its bindings are unchanged. It
@@ -212,7 +225,8 @@ publishes the refreshed dependency tree and toolchain pins.
   (`deny.toml`, `osv-scanner.toml`, `lychee.toml`), lint configuration
   (`clippy.toml`), `repo-metadata.toml`, and dual `MIT OR Apache-2.0` licensing.
 
-[Unreleased]: https://github.com/wickra-lib/wickra-copilot/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/wickra-lib/wickra-copilot/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/wickra-lib/wickra-copilot/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/wickra-lib/wickra-copilot/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/wickra-lib/wickra-copilot/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/wickra-lib/wickra-copilot/releases/tag/v0.1.0

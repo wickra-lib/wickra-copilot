@@ -1,7 +1,7 @@
 Package: wickracopilot
 Type: Package
 Title: Deterministic Market-Context Copilot Core
-Version: 0.1.2
+Version: 0.1.3
 Authors@R: person("kingchenc", role = c("aut", "cre"), email = "support@wickra.org")
 Description: R bindings for wickra-copilot over its C ABI hub: build a Copilot
     from a spec JSON, drive it with command JSON and read back a ranked list of

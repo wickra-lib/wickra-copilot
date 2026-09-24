@@ -1,6 +1,6 @@
 {
   "name": "wickra-copilot-linux-x64-gnu",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Native binding for wickra-copilot (Linux x64 glibc). Installed automatically as an optional dependency of wickra-copilot on matching platforms.",
   "main": "wickra-copilot.linux-x64-gnu.node",
   "files": [
