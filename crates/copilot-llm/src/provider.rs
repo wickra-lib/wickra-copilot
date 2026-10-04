@@ -250,7 +250,7 @@ mod tests {
         let ollama = OpenAiCompatible::from_provider(Provider::Ollama).unwrap();
         assert_eq!(ollama.base_url, "http://localhost:11434/v1");
         assert_eq!(ollama.model, "llama3");
-        assert!(ollama.api_key.is_empty());
+        assert_eq!(ollama.api_key, "");
 
         // Custom without a base URL is a clean error, not a panic.
         assert!(OpenAiCompatible::from_provider(Provider::Custom).is_err());

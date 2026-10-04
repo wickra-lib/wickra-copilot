@@ -166,7 +166,7 @@ mod tests {
     #[test]
     fn facts_are_sorted_by_magnitude_desc() {
         let ctx = build_context(&feeds(), &spec()).unwrap();
-        assert!(!ctx.facts.is_empty());
+        assert_ne!(ctx.facts, Vec::new());
         for pair in ctx.facts.windows(2) {
             assert!(pair[0].magnitude >= pair[1].magnitude);
         }

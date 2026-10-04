@@ -173,7 +173,7 @@ mod tests {
         // context is the core's, verbatim.
         assert_eq!(answer.context, ctx);
         // the question routes to a price-move tool call the core produced.
-        assert!(!answer.tool_calls.is_empty());
+        assert_ne!(answer.tool_calls, Vec::new());
         assert!(answer
             .tool_calls
             .iter()
