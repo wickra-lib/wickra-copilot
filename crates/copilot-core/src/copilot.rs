@@ -287,6 +287,6 @@ mod tests {
         );
         let ctx = c.build_context(&feeds).unwrap();
         assert!(ctx.facts.iter().any(|f| f.kind == FactKind::PriceMove));
-        assert!(!c.query("why did BTC dump").is_empty());
+        assert_ne!(c.query("why did BTC dump"), Vec::new());
     }
 }
