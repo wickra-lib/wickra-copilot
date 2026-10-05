@@ -19,7 +19,7 @@ default = ["parallel"]
 parallel = ["wickra-copilot-core/parallel"]
 
 [dependencies]
-wickra-copilot-core = { path = "../copilot-core", version = "0.1.4", default-features = false }
+wickra-copilot-core = { path = "../copilot-core", version = "0.2.0", default-features = false }
 
 [dev-dependencies]
 criterion.workspace = true
