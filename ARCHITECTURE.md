@@ -85,7 +85,7 @@ service and places no orders — it reads market data and asks questions.
 No indicator mathematics lives in this repository. Where a fact needs a derived
 series (realised volatility, OI deltas), `IndicatorSet` resolves each building
 block from the `wickra-core` registry by name and parameters (the same resolver
-the backtester uses), so `wickra-copilot` inherits all 514 indicators and any
+the backtester uses), so `wickra-copilot` inherits all 495 indicators and any
 future additions for free.
 
 ## Integration with the rest of Wickra
