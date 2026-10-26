@@ -231,7 +231,7 @@ Run the suites with the commands in
 
 ## Requirements
 
-- **Rust 1.86+** — the workspace MSRV; the Node binding needs **Rust 1.88**.
+- **Rust 1.87+** — the workspace MSRV; the Node binding needs **Rust 1.88**.
 - **Python 3.9+** — the Python binding.
 - **Node 22+** — the Node binding.
 - **Go 1.23+** — the Go binding.
