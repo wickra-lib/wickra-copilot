@@ -10,8 +10,8 @@ abstract: >-
   JSON-over-C-ABI data API in ten languages, with a separate, swappable LLM
   adapter.
 type: software
-version: "0.2.1"
-date-released: "2026-10-28"
+version: "0.2.2"
+date-released: "2026-11-26"
 authors:
   - alias: kingchenc
     website: "https://wickra.org"
