@@ -52,7 +52,8 @@ impl PyCopilot {
 
 /// The native module (`wickra_copilot._wickra_copilot`).
 #[pymodule]
-fn _wickra_copilot(module: &Bound<'_, PyModule>) -> PyResult<()> {
+#[pyo3(name = "_wickra_copilot")]
+fn wickra_copilot_extension(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add("__version__", env!("CARGO_PKG_VERSION"))?;
     module.add_class::<PyCopilot>()?;
     Ok(())
