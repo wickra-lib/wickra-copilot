@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches: [main]
 
 permissions:
@@ -15,6 +16,7 @@ concurrency:
 
 jobs:
   test:
+    if: ${{ !github.event.pull_request.draft }}
     name: Test (${{ matrix.os }}, ${{ matrix.features }})
     strategy:
       fail-fast: false
@@ -42,6 +44,7 @@ jobs:
       - run: cargo test --workspace ${{ matrix.features }} --exclude wickra-copilot-python --exclude wickra-copilot-c
 
   lint:
+    if: ${{ !github.event.pull_request.draft }}
     name: Format & Clippy
     runs-on: ubuntu-latest
     timeout-minutes: 15 # backstop against a wedged job, not a budget
@@ -58,6 +61,7 @@ jobs:
       - run: cargo clippy --workspace --all-targets --no-default-features -- -D warnings
 
   msrv:
+    if: ${{ !github.event.pull_request.draft }}
     name: MSRV workspace (1.87)
     runs-on: ubuntu-latest
     timeout-minutes: 30 # backstop against a wedged job, not a budget
@@ -78,6 +82,7 @@ jobs:
           --exclude wickra-copilot-node
 
   msrv-node:
+    if: ${{ !github.event.pull_request.draft }}
     name: MSRV node (1.88)
     runs-on: ubuntu-latest
     timeout-minutes: 30 # backstop against a wedged job, not a budget
@@ -92,6 +97,7 @@ jobs:
       - run: cargo build -p wickra-copilot-node
 
   supply-chain:
+    if: ${{ !github.event.pull_request.draft }}
     name: cargo-deny
     runs-on: ubuntu-latest
     timeout-minutes: 15 # backstop against a wedged job, not a budget
@@ -141,6 +147,7 @@ jobs:
             ./
 
   coverage:
+    if: ${{ !github.event.pull_request.draft }}
     name: Coverage
     runs-on: ubuntu-latest
     timeout-minutes: 45 # backstop against a wedged job, not a budget
@@ -176,6 +183,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   fuzz-smoke:
+    if: ${{ !github.event.pull_request.draft }}
     name: Fuzz (smoke)
     runs-on: ubuntu-latest
     timeout-minutes: 45 # backstop against a wedged job, not a budget
@@ -207,6 +215,7 @@ jobs:
         working-directory: fuzz
 
   python:
+    if: ${{ !github.event.pull_request.draft }}
     name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -265,6 +274,7 @@ jobs:
           fi
 
   node:
+    if: ${{ !github.event.pull_request.draft }}
     name: Node ${{ matrix.node-version }} on ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -334,6 +344,7 @@ jobs:
             });'
 
   wasm:
+    if: ${{ !github.event.pull_request.draft }}
     name: WASM
     runs-on: ubuntu-latest
     timeout-minutes: 45 # backstop against a wedged job, not a budget
@@ -387,6 +398,7 @@ jobs:
         working-directory: bindings/wasm
 
   c-abi:
+    if: ${{ !github.event.pull_request.draft }}
     name: C ABI on ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -432,6 +444,7 @@ jobs:
           ctest --test-dir examples/c/build -C Release --output-on-failure
 
   go:
+    if: ${{ !github.event.pull_request.draft }}
     name: Go on ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -490,6 +503,7 @@ jobs:
           go test ./...
 
   csharp:
+    if: ${{ !github.event.pull_request.draft }}
     name: C# on ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -514,6 +528,7 @@ jobs:
         run: dotnet test bindings/csharp/WickraCopilot.Tests/WickraCopilot.Tests.csproj -c Release
 
   java:
+    if: ${{ !github.event.pull_request.draft }}
     name: Java on ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -545,6 +560,7 @@ jobs:
           command: mvn -B -f bindings/java test
 
   r:
+    if: ${{ !github.event.pull_request.draft }}
     name: R on ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -590,6 +606,7 @@ jobs:
   # a published wheel that declared a licence it did not carry, and version
   # declarations that had drifted apart across six ecosystems.
   repo-checks:
+    if: ${{ !github.event.pull_request.draft }}
     name: Repository checks
     runs-on: ubuntu-latest
     timeout-minutes: 15 # backstop against a wedged job, not a budget
@@ -612,6 +629,7 @@ jobs:
   # A job-level continue-on-error would not do: the check run still concludes
   # `failure`, the commit shows red and a release gate reading check runs stops.
   links:
+    if: ${{ !github.event.pull_request.draft }}
     name: External links (non-blocking)
     runs-on: ubuntu-latest
     timeout-minutes: 10 # backstop against a wedged job, not a budget
@@ -639,6 +657,7 @@ jobs:
   # that a patch release keeps it, and a rename that slips through review goes
   # out to six registries in one irreversible run.
   semver:
+    if: ${{ !github.event.pull_request.draft }}
     name: Public API (cargo-semver-checks)
     runs-on: ubuntu-latest
     timeout-minutes: 30 # backstop: it builds rustdoc JSON for each crate and its baseline
@@ -690,6 +709,7 @@ jobs:
   # tag, where it is already too late. This builds the same two images on every
   # pull request.
   python-wheel-container-smoke:
+    if: ${{ !github.event.pull_request.draft }}
     name: Python wheel (${{ matrix.manylinux }} smoke)
     runs-on: ubuntu-latest
     timeout-minutes: 45 # backstop: vendored OpenSSL adds a from-source compile
@@ -742,6 +762,7 @@ jobs:
   # because it looks executable. This compiles each of them; it does not run
   # them, since several want a network or a built native library.
   examples:
+    if: ${{ !github.event.pull_request.draft }}
     name: Examples
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -925,6 +946,7 @@ jobs:
           echo "$out" | grep -q 'facts'
 
   binding-surface:
+    if: ${{ !github.event.pull_request.draft }}
     name: Binding surface parity
     runs-on: ubuntu-latest
     timeout-minutes: 15 # backstop against a wedged job, not a budget
@@ -942,7 +964,7 @@ jobs:
   # checks are left out on purpose -- an outside outage must not hold a merge.
   ci-ok:
     name: ci-ok
-    if: always()
+    if: ${{ !github.event.pull_request.draft && (always()) }}
     needs:
       - test
       - lint
